@@ -50,6 +50,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     editable_fields = ('display_name', 'widget_position', 'tabs', 'discussions_scope')
 
+    has_author_view = True
+
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -62,11 +64,20 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         vertical = len(pos_list) > 1 and pos_list[0] or 'center'
         return (horisontal, vertical)
 
+
+    def author_view(self, context=None):
+        return self._base_view(context=context)
+
     def student_view(self, context=None):
         """
         The primary view of the AnnotoXBlock, shown to students
         when viewing courses.
         """
+        frag = self._base_view(context=context)
+        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
+        return frag
+
+    def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
         horisontal, vertical = self.get_position()
         js_params = {
@@ -81,7 +92,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         html = self.resource_string("static/html/annoto.html")
         frag = Fragment(html.format(self=self))
         frag.add_css(self.resource_string("static/css/annoto.css"))
-        frag.add_javascript(self.resource_string("static/js/annoto-bootstrap.js"))
         frag.add_javascript(self.resource_string("static/js/src/annoto.js"))
         frag.initialize_js('AnnotoXBlock', json_args=js_params)
         return frag
