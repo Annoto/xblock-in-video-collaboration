@@ -37,7 +37,9 @@ function AnnotoXBlock(runtime, element, options) {
                 var config = {
                     clientId: options.clientId,
                     position: options.horisontal,
-                    tabs: options.tabs,
+                    features: {
+                        tabs: options.tabs
+                    },
                     locale: lang,
                     rtl: (options.rtlLanguages.indexOf(lang) >= 0),
                     align: {
