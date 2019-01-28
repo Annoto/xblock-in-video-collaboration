@@ -4,6 +4,7 @@ import json
 import logging
 from webob import Response
 from django.conf import settings
+from django.http.request import HttpRequest
 
 import pkg_resources
 from xblock.core import XBlock
@@ -116,41 +117,10 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def _json_resp(self, data):
         return Response(json.dumps(data))
 
-    def _get_scheme(self, request):
-        scheme = 'http'
-        if settings.SECURE_PROXY_SSL_HEADER:
-            try:
-                header, value = settings.SECURE_PROXY_SSL_HEADER
-            except ValueError:
-                pass
-            else:
-                scheme = request.environ.get(header) == value and 'https' or scheme
-        return scheme
-
-    def _get_host(self, request):
-        scheme = self._get_scheme(request)
-
-        if settings.USE_X_FORWARDED_PORT and 'HTTP_X_FORWARDED_PORT' in request.environ:
-            port = request.environ['HTTP_X_FORWARDED_PORT']
-        else:
-            port = request.environ['SERVER_PORT']
-
-        if settings.USE_X_FORWARDED_HOST and ('HTTP_X_FORWARDED_HOST' in request.environ):
-            host = request.environ['HTTP_X_FORWARDED_HOST']
-        elif 'HTTP_HOST' in request.environ:
-            host = request.environ['HTTP_HOST']
-        else:
-            host = request.environ['SERVER_NAME']
-            if port != ('443' if scheme == 'https' else '80'):
-                host = '%{}:%{}'.format(host, port)
-
-        return host
-
     def _build_absolute_uri(self, request, location):
-        host = self._get_host(request)
-        scheme = self._get_scheme(request)
-
-        return '{scheme}://{host}{location}'.format(scheme=scheme, host=host, location=location)
+        _django_request = HttpRequest()
+        _django_request.META = request.environ.copy()
+        return _django_request.build_absolute_uri(location)
 
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
