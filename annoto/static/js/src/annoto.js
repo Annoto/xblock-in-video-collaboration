@@ -32,16 +32,14 @@ function AnnotoXBlock(runtime, element, options) {
                     playerElem.find('video').attr('id', playerId);
                 }
 
-                var lang = $.cookie('openedx-language-preference');
-
                 var config = {
                     clientId: options.clientId,
                     position: options.horisontal,
                     features: {
                         tabs: options.tabs
                     },
-                    locale: lang,
-                    rtl: (options.rtlLanguages.indexOf(lang) >= 0),
+                    locale: options.language,
+                    rtl: options.rtl,
                     align: {
                         vertical: options.vertical,
                         horizontal: 'element_edge',

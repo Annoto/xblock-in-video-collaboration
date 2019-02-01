@@ -21,8 +21,7 @@ _ = lambda text: text
 log = logging.getLogger(__name__)
 
 
-@XBlock.needs("i18n")
-@XBlock.needs('user')
+@XBlock.needs('i18n', 'user')
 class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     display_name = String(
@@ -81,13 +80,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
         horisontal, vertical = self.get_position()
+        translator = self.runtime.service(self, 'i18n').translator
         js_params = {
             'clientId': annoto_auth.get('client_id'),
             'horisontal': horisontal,
             'vertical': vertical,
             'tabs':self.tabs,
             'privateThread': self.discussions_scope,
-            'rtlLanguages': settings.LANGUAGES_BIDI
+            'language': translator.get_language(),
+            'rtl': translator.get_language_bidi()
         }
 
         html = self.resource_string("static/html/annoto.html")
