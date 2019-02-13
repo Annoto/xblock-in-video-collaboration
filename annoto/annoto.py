@@ -43,7 +43,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     discussions_scope = NamedBoolean(
         display_name=_('Discussions Scope'),
-        display_true=_('Private per course    (Default)'),
+        display_true=_('Private per course'),
         display_false=_('Site Wide'),
         default=True
     )
