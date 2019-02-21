@@ -12,6 +12,9 @@ from xblock.fields import Scope, String, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.lib.courses import course_image_url
+from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
 from .fields import NamedBoolean
 
@@ -81,14 +84,23 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         annoto_auth = self.get_annoto_settings()
         horisontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
+
+        course = self.get_course_obj()
+        course_overview = CourseOverview.objects.get(id=self.course_id)
+
         js_params = {
             'clientId': annoto_auth.get('client_id'),
             'horisontal': horisontal,
             'vertical': vertical,
             'tabs':self.tabs,
             'privateThread': self.discussions_scope,
+            'displayName': self.display_name,
             'language': translator.get_language(),
-            'rtl': translator.get_language_bidi()
+            'rtl': translator.get_language_bidi(),
+            'courseId': self.course_id.to_deprecated_string(),
+            'courseDisplayName': course.display_name,
+            'courseDescription': course_overview.short_description,
+            'courseImage': course_image_url(course)
         }
 
         html = self.resource_string("static/html/annoto.html")
@@ -140,6 +152,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         name = profile_name or user.get_full_name() or user.username
         photo = self._build_absolute_uri(request, get_profile_image_urls_for_user(user)['small'])
 
+        roles = user.courseaccessrole_set.filter(course_id=self.course_id).values_list('role', flat=True)
+
+        if CourseStaffRole.ROLE in roles or GlobalStaff.has_user(user):
+            scope = 'super-mod'
+        elif CourseInstructorRole.ROLE in roles:
+            scope = 'moderator'
+        else:
+            scope = 'user'
+
         payload = {
             'expire': int(time.time() + 60 * 20),
             'iss': annoto_auth['client_id'],
@@ -147,6 +168,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'name': name,
             'email': user.email,
             'photoUrl': photo,
+            'scope': scope
         }
 
         token = jwt.encode(payload, annoto_auth['client_secret'], algorithm='HS256')

@@ -51,9 +51,12 @@ function AnnotoXBlock(runtime, element, options) {
                                 element: playerId,
                                 mediaDetails: function() {
                                     return {
-                                        title: el.parent().find('h3').html(),
+                                        title: options.displayName,
                                         group: {
-                                            id: 'Group_' + playerId,
+                                            id: options.courseId,
+                                            title: options.courseDisplayName,
+                                            description: options.courseDescription,
+                                            thumbnails: window.location.origin + options.courseImage,
                                             privateThread: options.privateThread
                                         }
                                     }
