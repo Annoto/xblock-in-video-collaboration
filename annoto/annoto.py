@@ -154,7 +154,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
         roles = user.courseaccessrole_set.filter(course_id=self.course_id).values_list('role', flat=True)
 
-        if CourseStaffRole.ROLE in roles or GlobalStaff.has_user(user):
+        if CourseStaffRole.ROLE in roles or GlobalStaff().has_user(user):
             scope = 'super-mod'
         elif CourseInstructorRole.ROLE in roles:
             scope = 'moderator'

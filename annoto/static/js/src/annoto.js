@@ -56,7 +56,9 @@ function AnnotoXBlock(runtime, element, options) {
                                             id: options.courseId,
                                             title: options.courseDisplayName,
                                             description: options.courseDescription,
-                                            thumbnails: window.location.origin + options.courseImage,
+                                            thumbnails: {
+                                                default: window.location.origin + options.courseImage
+                                            },
                                             privateThread: options.privateThread
                                         }
                                     }
