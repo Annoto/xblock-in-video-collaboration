@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-26 10:59+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: annoto.py:28
+msgid "Display Name"
+msgstr ""
+
+#: annoto.py:29
+msgid "Display name for this module"
+msgstr ""
+
+#: annoto.py:34
+msgid "Widget Position"
+msgstr ""
+
+#: annoto.py:40
+msgid "Tabs"
+msgstr ""
+
+#: annoto.py:45
+msgid "Discussions Scope"
+msgstr ""
+
+#: annoto.py:46
+msgid "Private per course    (Default)"
+msgstr ""
+
+#: annoto.py:47
+msgid "Site Wide"
+msgstr ""
+
+#: annoto.py:150
+msgid "Annoto authorization is not provided in \"LTI Passports\"."
+msgstr ""
+
+#: annoto.py:155
+msgid "Requested user does not exists."
+msgstr ""

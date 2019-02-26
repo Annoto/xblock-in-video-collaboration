@@ -31,11 +31,13 @@ setup(
     ],
     install_requires=[
         'XBlock',
+        'xblock_utils',
+        'PyJWT',
     ],
     entry_points={
         'xblock.v1': [
             'annoto = annoto:AnnotoXBlock',
         ]
     },
-    package_data=package_data("annoto", ["static", "public"]),
+    package_data=package_data("annoto", ["static", "public", "translations"]),
 )
