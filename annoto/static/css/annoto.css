@@ -1,0 +1,9 @@
+/* CSS for AnnotoXBlock */
+.annoto-timeline-dock {
+    height: 32px !important;
+}
+
+.annoto-timeline-dock
+.annoto-progress-bar-organ {
+    display: none !important;
+}
