@@ -31,6 +31,7 @@ setup(
     description='An XBlock for adding Annoto in-video collaboration solution to any video',
     long_description=README,
     license='Apache 2.0',
+    author='Annoto',
     packages=[
         'annoto',
     ],
