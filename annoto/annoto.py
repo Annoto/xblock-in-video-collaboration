@@ -37,7 +37,14 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
     widget_position = String(
         display_name=_("Widget Position"),
-        values=('top-right', 'right', 'bottom-right', 'top-left', 'left', 'bottom-left'),
+        values=(
+            {'display_name': _('top-right'), 'value': 'top-right'},
+            {'display_name': _('right'), 'value': 'right'},
+            {'display_name': _('bottom-right'), 'value': 'bottom-right'},
+            {'display_name': _('top-left'), 'value': 'top-left'},
+            {'display_name': _('left'), 'value': 'left'},
+            {'display_name': _('bottom-left'), 'value': 'bottom-left'}
+        ),
         default="top-right",
     )
 
