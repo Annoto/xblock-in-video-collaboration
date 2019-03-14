@@ -107,6 +107,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'courseDisplayName': course.display_name,
             'courseDescription': course_overview.short_description,
             'courseImage': course_image_url(course),
+            'demoMode': not bool(annoto_auth.get('client_id')),
         }
 
         context['error'] = {}

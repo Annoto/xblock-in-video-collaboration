@@ -70,7 +70,7 @@ function AnnotoXBlock(runtime, element, options) {
                             }
                         },
                     ],
-                    demoMode: false
+                    demoMode: options.demoMode
                 };
 
                 Annoto.on('ready', function (api) {
