@@ -97,6 +97,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         annoto_auth = self.get_annoto_settings()
         horisontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
+        lang = getattr(
+            translator,
+            'get_language',
+            lambda: translator.info().get('language', settings.LANGUAGE_CODE)
+        )()
+        rtl = getattr(translator, 'get_language_bidi', lambda: lang in settings.LANGUAGES_BIDI)()
 
         course = self.get_course_obj()
         course_overview = CourseOverview.objects.get(id=self.course_id)
@@ -108,8 +114,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'tabs':self.tabs,
             'privateThread': self.discussions_scope,
             'displayName': self.get_parent().display_name,
-            'language': translator.get_language(),
-            'rtl': translator.get_language_bidi(),
+            'language': lang,
+            'rtl': rtl,
             'courseId': self.course_id.to_deprecated_string(),
             'courseDisplayName': course.display_name,
             'courseDescription': course_overview.short_description,
