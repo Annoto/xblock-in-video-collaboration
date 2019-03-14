@@ -17,38 +17,92 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: annoto.py:28
+#: annoto.py:32
 msgid "Display Name"
 msgstr ""
 
-#: annoto.py:29
+#: annoto.py:33
 msgid "Display name for this module"
 msgstr ""
 
-#: annoto.py:34
+#: annoto.py:38
 msgid "Widget Position"
 msgstr ""
 
 #: annoto.py:40
-msgid "Tabs"
+msgid "top-right"
+msgstr ""
+
+#: annoto.py:41
+msgid "right"
+msgstr ""
+
+#: annoto.py:42
+msgid "bottom-right"
+msgstr ""
+
+#: annoto.py:43
+msgid "top-left"
+msgstr ""
+
+#: annoto.py:44
+msgid "left"
 msgstr ""
 
 #: annoto.py:45
+msgid "bottom-left"
+msgstr ""
+
+#: annoto.py:51
+msgid "Tabs"
+msgstr ""
+
+#: annoto.py:56
 msgid "Discussions Scope"
 msgstr ""
 
-#: annoto.py:46
-msgid "Private per course    (Default)"
+#: annoto.py:57
+msgid "Private per course"
 msgstr ""
 
-#: annoto.py:47
+#: annoto.py:58
 msgid "Site Wide"
 msgstr ""
 
-#: annoto.py:150
+#: annoto.py:121
+msgid "You did not provide annoto credentials. And you view it in demo mode."
+msgstr ""
+
+#: annoto.py:122
+msgid ""
+"Please add \"annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>\" to \"Advanced Settings"
+"\" > \"LTI Passports\""
+msgstr ""
+
+#: annoto.py:130
+msgid "\"CLIENT_ID\" is not a valid JWT token."
+msgstr ""
+
+#: annoto.py:131
+msgid ""
+"Please provide valid \"CLIENT_ID\" in \"Advanced Settings\" > \"LTI Passports"
+"\" > \"annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>\""
+msgstr ""
+
+#: annoto.py:127
+msgid "\"CLIENT_SECRET\" is required when \"CLIENT_ID\" provided."
+msgstr ""
+
+#: annoto.py:128
+msgid ""
+"Please add \"CLIENT_SECRET\" to \"Advanced Settings\" > \"LTI Passports\" > "
+"\"annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>\""
+msgstr ""
+
+#: annoto.py:169
 msgid "Annoto authorization is not provided in \"LTI Passports\"."
 msgstr ""
 
-#: annoto.py:155
+#: annoto.py:174
 msgid "Requested user does not exists."
 msgstr ""
