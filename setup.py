@@ -32,6 +32,7 @@ setup(
     long_description=README,
     license='Apache 2.0',
     author='Annoto',
+    url='https://github.com/Annoto/xblock-in-video-collaboration',
     packages=[
         'annoto',
     ],
