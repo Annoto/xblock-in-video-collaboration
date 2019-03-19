@@ -7,3 +7,19 @@
 .annoto-progress-bar-organ {
     display: none !important;
 }
+
+.annoto-error {
+    border: 1px solid #700;
+    background: #d00;
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.annoto-warning {
+    border: 1px solid #b60;
+    background: #fa0;
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+}

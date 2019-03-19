@@ -5,6 +5,7 @@ import logging
 from webob import Response
 from django.conf import settings
 from django.http.request import HttpRequest
+from django.template import Context, Template
 
 import pkg_resources
 from xblock.core import XBlock
@@ -35,7 +36,14 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
     widget_position = String(
         display_name=_("Widget Position"),
-        values=('top-right', 'right', 'bottom-right', 'top-left', 'left', 'bottom-left'),
+        values=(
+            {'display_name': _('top-right'), 'value': 'top-right'},
+            {'display_name': _('right'), 'value': 'right'},
+            {'display_name': _('bottom-right'), 'value': 'bottom-right'},
+            {'display_name': _('top-left'), 'value': 'top-left'},
+            {'display_name': _('left'), 'value': 'left'},
+            {'display_name': _('bottom-left'), 'value': 'bottom-left'}
+        ),
         default="top-right",
     )
 
@@ -69,6 +77,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
 
     def author_view(self, context=None):
+        context['is_author_view'] = True
         return self._base_view(context=context)
 
     def student_view(self, context=None):
@@ -76,6 +85,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         The primary view of the AnnotoXBlock, shown to students
         when viewing courses.
         """
+        context['is_author_view'] = False
         frag = self._base_view(context=context)
         frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
         return frag
@@ -84,6 +94,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         annoto_auth = self.get_annoto_settings()
         horisontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
+        lang = getattr(
+            translator,
+            'get_language',
+            lambda: translator.info().get('language', settings.LANGUAGE_CODE)
+        )()
+        rtl = getattr(translator, 'get_language_bidi', lambda: lang in settings.LANGUAGES_BIDI)()
 
         course = self.get_course_obj()
         course_overview = CourseOverview.objects.get(id=self.course_id)
@@ -94,17 +110,45 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'vertical': vertical,
             'tabs':self.tabs,
             'privateThread': self.discussions_scope,
-            'displayName': self.display_name,
-            'language': translator.get_language(),
-            'rtl': translator.get_language_bidi(),
+            'displayName': self.get_parent().display_name,
+            'language': lang,
+            'rtl': rtl,
             'courseId': self.course_id.to_deprecated_string(),
             'courseDisplayName': course.display_name,
             'courseDescription': course_overview.short_description,
-            'courseImage': course_image_url(course)
+            'courseImage': course_image_url(course),
+            'demoMode': not bool(annoto_auth.get('client_id')),
         }
 
-        html = self.resource_string("static/html/annoto.html")
-        frag = Fragment(html.format(self=self))
+        context['error'] = {}
+        if not annoto_auth.get('client_id'):
+            context['error']['type'] = 'warning'
+            context['error']['messages'] = [
+                _('You did not provide annoto credentials. And you view it in demo mode.'),
+                _('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
+            ]
+        else:
+            try:
+                jwt.PyJWS().decode(annoto_auth.get('client_id'), verify=False)
+            except:
+                context['error']['type'] = 'error'
+                context['error']['messages'] = [
+                    _('"CLIENT_ID" is not a valid JWT token.'),
+                    _('Please provide valid "CLIENT_ID" in '
+                      '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
+                ]
+            else:
+                if not annoto_auth.get('client_secret'):
+                    context['error']['type'] = 'error'
+                    context['error']['messages'] = [
+                        _('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
+                        _('Please add "CLIENT_SECRET" to '
+                          '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
+                    ]
+
+        template = Template(self.resource_string("static/html/annoto.html"))
+        html = template.render(Context(context))
+        frag = Fragment(html)
         frag.add_css(self.resource_string("static/css/annoto.css"))
         frag.add_javascript(self.resource_string("static/js/src/annoto.js"))
         frag.initialize_js('AnnotoXBlock', json_args=js_params)
@@ -123,7 +167,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         if course:
             auth = [lp for lp in course.lti_passports if lp.startswith('annoto-auth:')]
             if auth:
-                return dict(zip(['name', 'client_id', 'client_secret'], auth[0].split(':')))
+                values = [v.strip() for v in auth[0].split(':')]
+                return dict(zip(['name', 'client_id', 'client_secret'], values))
 
         return {}
 
