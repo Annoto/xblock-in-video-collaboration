@@ -1,4 +1,3 @@
-import re
 import jwt
 import time
 import json
@@ -64,8 +63,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     has_author_view = True
 
-    JWT_RE = re.compile('^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$')
-
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -130,18 +127,24 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
                 _('You did not provide annoto credentials. And you view it in demo mode.'),
                 _('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
             ]
-        elif not self.JWT_RE.match(annoto_auth.get('client_id')):
-            context['error']['type'] = 'error'
-            context['error']['messages'] = [
-                _('"CLIENT_ID" is not a valid JWT token.'),
-                _('Please provide valid "CLIENT_ID" in "Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
-            ]
-        elif annoto_auth.get('client_id') and not annoto_auth.get('client_secret'):
-            context['error']['type'] = 'error'
-            context['error']['messages'] = [
-                _('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
-                _('Please add "CLIENT_SECRET" to "Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
-            ]
+        else:
+            try:
+                jwt.PyJWS().decode(annoto_auth.get('client_id'), verify=False)
+            except:
+                context['error']['type'] = 'error'
+                context['error']['messages'] = [
+                    _('"CLIENT_ID" is not a valid JWT token.'),
+                    _('Please provide valid "CLIENT_ID" in '
+                      '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
+                ]
+            else:
+                if not annoto_auth.get('client_secret'):
+                    context['error']['type'] = 'error'
+                    context['error']['messages'] = [
+                        _('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
+                        _('Please add "CLIENT_SECRET" to '
+                          '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
+                    ]
 
         template = Template(self.resource_string("static/html/annoto.html"))
         html = template.render(Context(context))
