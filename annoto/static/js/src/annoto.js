@@ -22,15 +22,7 @@ function AnnotoXBlock(runtime, element, options) {
 
             var setupAnnoto = function (e) {
                 var el = $(e.target);
-                var playerType = 'youtube';
-                var playerElem = el.find('div.video-player >:first-child');
-                var playerId = playerElem.attr("id");
-
-                if (playerElem.prop('nodeName') === 'DIV') {
-                    playerType = 'html5';
-                    playerId = 'html5-' + playerId;
-                    playerElem.find('video').attr('id', playerId);
-                }
+                var playerId = el.attr('id');
 
                 var config = {
                     clientId: options.clientId,
@@ -47,7 +39,7 @@ function AnnotoXBlock(runtime, element, options) {
                     widgets: [
                         {
                             player: {
-                                type: playerType,
+                                type: 'openedx',
                                 element: playerId,
                                 mediaDetails: function() {
                                     return {
@@ -66,7 +58,7 @@ function AnnotoXBlock(runtime, element, options) {
                             },
                             openOnLoad: true,
                             timeline: {
-                                disableDockPadding: true,
+                                overlayVideo: true,
                             }
                         },
                     ],
