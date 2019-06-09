@@ -14,7 +14,7 @@ function AnnotoXBlock(runtime, element, options) {
                         if (data.status == 'ok') {
                             api.auth(data.token);
                         } else {
-                            console.log('[Annoto] ERROR: ', data.msg);
+                            window.console && console.log('[Annoto] ERROR: ', data.msg);
                         }
                     }
                 });
@@ -72,11 +72,11 @@ function AnnotoXBlock(runtime, element, options) {
                 Annoto.boot(config);
             };
 
-            $('.video').first().on('ready', setupAnnoto);
+            $('.xmodule_VideoModule .video').first().on('ready', setupAnnoto);
         });
     };
 
-    if (typeof require == "function" && typeof Annoto != "object") {
+    if (typeof require == 'function' && typeof Annoto != 'object') {
         require(['//app.annoto.net/annoto-bootstrap.js'], function(Annoto) {
             factory();
         });
