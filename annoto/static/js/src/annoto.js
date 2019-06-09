@@ -36,6 +36,9 @@ function AnnotoXBlock(runtime, element, options) {
                         vertical: options.vertical,
                         horizontal: 'element_edge',
                     },
+                    width: {
+                        max: 400,
+                    },
                     widgets: [
                         {
                             player: {
