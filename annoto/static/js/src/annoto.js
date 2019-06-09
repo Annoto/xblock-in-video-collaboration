@@ -44,8 +44,8 @@ function AnnotoXBlock(runtime, element, options) {
                             player: {
                                 type: 'openedx',
                                 element: playerId,
-                                mediaDetails: function() {
-                                    return {
+                                mediaDetails: function(details) {
+                                    var extendedDetails = {
                                         title: options.mediaTitle,
                                         group: {
                                             id: options.courseId,
@@ -57,6 +57,11 @@ function AnnotoXBlock(runtime, element, options) {
                                             privateThread: options.privateThread
                                         }
                                     }
+                                    if (details) {
+                                        extendedDetails.authorName = details.authorName;
+                                        extendedDetails.description = details.description;
+                                    }
+                                    return extendedDetails;
                                 }
                             },
                             openOnLoad: true,
