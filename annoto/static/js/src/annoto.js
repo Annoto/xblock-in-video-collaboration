@@ -51,7 +51,7 @@ function AnnotoXBlock(runtime, element, options) {
                                 element: playerId,
                                 mediaDetails: function() {
                                     return {
-                                        title: options.displayName,
+                                        title: options.mediaTitle,
                                         group: {
                                             id: options.courseId,
                                             title: options.courseDisplayName,

@@ -110,7 +110,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'vertical': vertical,
             'tabs':self.tabs,
             'privateThread': self.discussions_scope,
-            'displayName': self.get_parent().display_name,
+            'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
             'courseId': self.course_id.to_deprecated_string(),
