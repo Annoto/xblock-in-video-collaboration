@@ -23,18 +23,37 @@ function AnnotoXBlock(runtime, element, options) {
             var setupAnnoto = function (e) {
                 var el = $(e.target);
                 var playerId = el.attr('id');
+                var horizontalAlign = options.overlayVideo ? 'inner' : 'element_edge';
+                var openOnLoad = true;
+                var enableTabs = true;
+                var videoWrapper;
+                
+                if (horizontalAlign === 'inner') {
+                    videoWrapper = el.find('div.video-wrapper');
+                    openOnLoad = false;
+                    enableTabs = false;
+                }
+
+                if (options.initialState !== 'auto') {
+                    openOnLoad = !!(options.initialState === 'open');
+                }
+                
+                if (options.tabs !== 'auto') {
+                    enableTabs = !!(options.tabs === 'enabled');
+                }
 
                 var config = {
                     clientId: options.clientId,
                     position: options.horisontal,
+                    relativePositionElement: videoWrapper,
                     features: {
-                        tabs: options.tabs
+                        tabs: enableTabs,
                     },
                     locale: options.language,
                     rtl: options.rtl,
                     align: {
                         vertical: options.vertical,
-                        horizontal: 'element_edge',
+                        horizontal: horizontalAlign,
                     },
                     width: {
                         max: 400,
@@ -64,7 +83,7 @@ function AnnotoXBlock(runtime, element, options) {
                                     return extendedDetails;
                                 }
                             },
-                            openOnLoad: true,
+                            openOnLoad: openOnLoad,
                             timeline: {
                                 overlayVideo: true,
                             }
