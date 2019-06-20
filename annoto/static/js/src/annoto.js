@@ -14,7 +14,7 @@ function AnnotoXBlock(runtime, element, options) {
                         if (data.status == 'ok') {
                             api.auth(data.token);
                         } else {
-                            console.log('[Annoto] ERROR: ', data.msg);
+                            window.console && console.log('[Annoto] ERROR: ', data.msg);
                         }
                     }
                 });
@@ -22,36 +22,50 @@ function AnnotoXBlock(runtime, element, options) {
 
             var setupAnnoto = function (e) {
                 var el = $(e.target);
-                var playerType = 'youtube';
-                var playerElem = el.find('div.video-player >:first-child');
-                var playerId = playerElem.attr("id");
+                var playerId = el.attr('id');
+                var horizontalAlign = options.overlayVideo ? 'inner' : 'element_edge';
+                var openOnLoad = true;
+                var enableTabs = true;
+                var videoWrapper;
+                
+                if (horizontalAlign === 'inner') {
+                    videoWrapper = el.find('div.video-wrapper');
+                    openOnLoad = false;
+                    enableTabs = false;
+                }
 
-                if (playerElem.prop('nodeName') === 'DIV') {
-                    playerType = 'html5';
-                    playerId = 'html5-' + playerId;
-                    playerElem.find('video').attr('id', playerId);
+                if (options.initialState !== 'auto') {
+                    openOnLoad = !!(options.initialState === 'open');
+                }
+                
+                if (options.tabs !== 'auto') {
+                    enableTabs = !!(options.tabs === 'enabled');
                 }
 
                 var config = {
                     clientId: options.clientId,
                     position: options.horisontal,
+                    relativePositionElement: videoWrapper,
                     features: {
-                        tabs: options.tabs
+                        tabs: enableTabs,
                     },
                     locale: options.language,
                     rtl: options.rtl,
                     align: {
                         vertical: options.vertical,
-                        horizontal: 'element_edge',
+                        horizontal: horizontalAlign,
+                    },
+                    width: {
+                        max: 400,
                     },
                     widgets: [
                         {
                             player: {
-                                type: playerType,
+                                type: 'openedx',
                                 element: playerId,
-                                mediaDetails: function() {
-                                    return {
-                                        title: options.displayName,
+                                mediaDetails: function(details) {
+                                    var extendedDetails = {
+                                        title: options.mediaTitle,
                                         group: {
                                             id: options.courseId,
                                             title: options.courseDisplayName,
@@ -62,11 +76,16 @@ function AnnotoXBlock(runtime, element, options) {
                                             privateThread: options.privateThread
                                         }
                                     }
+                                    if (details) {
+                                        extendedDetails.authorName = details.authorName;
+                                        extendedDetails.description = details.description;
+                                    }
+                                    return extendedDetails;
                                 }
                             },
-                            openOnLoad: true,
+                            openOnLoad: openOnLoad,
                             timeline: {
-                                disableDockPadding: true,
+                                overlayVideo: true,
                             }
                         },
                     ],
@@ -80,11 +99,11 @@ function AnnotoXBlock(runtime, element, options) {
                 Annoto.boot(config);
             };
 
-            $('.video').first().on('ready', setupAnnoto);
+            $('.xmodule_VideoModule .video').first().on('ready', setupAnnoto);
         });
     };
 
-    if (typeof require == "function" && typeof Annoto != "object") {
+    if (typeof require == 'function' && typeof Annoto != 'object') {
         require(['//app.annoto.net/annoto-bootstrap.js'], function(Annoto) {
             factory();
         });
