@@ -37,19 +37,39 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     widget_position = String(
         display_name=_("Widget Position"),
         values=(
-            {'display_name': _('top-right'), 'value': 'top-right'},
-            {'display_name': _('right'), 'value': 'right'},
-            {'display_name': _('bottom-right'), 'value': 'bottom-right'},
             {'display_name': _('top-left'), 'value': 'top-left'},
+            {'display_name': _('top-right'), 'value': 'top-right'},
             {'display_name': _('left'), 'value': 'left'},
-            {'display_name': _('bottom-left'), 'value': 'bottom-left'}
+            {'display_name': _('right'), 'value': 'right'},
+            {'display_name': _('bottom-left'), 'value': 'bottom-left'},
+            {'display_name': _('bottom-right'), 'value': 'bottom-right'}
         ),
-        default="top-right",
+        default="top-left",
     )
 
-    tabs = Boolean(
-        display_name=_("Tabs"),
+    overlay_video = Boolean(
+        display_name=_("Overlay Video"),
         default=True
+    )
+
+    tabs = String(
+        display_name=_("Tabs"),
+        values=(
+            {'display_name': _('Auto'), 'value': 'auto'},
+            {'display_name': _('Enabled'), 'value': 'enabled'},
+            {'display_name': _('Hidden'), 'value': 'hidden'}
+        ),
+        default="auto",
+    )
+
+    initial_state = String(
+        display_name=_("Initial State"),
+        values=(
+            {'display_name': _('Auto'), 'value': 'auto'},
+            {'display_name': _('Open'), 'value': 'open'},
+            {'display_name': _('Closed'), 'value': 'closed'}
+        ),
+        default="auto",
     )
 
     discussions_scope = NamedBoolean(
@@ -59,7 +79,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default=True
     )
 
-    editable_fields = ('display_name', 'widget_position', 'tabs', 'discussions_scope')
+    editable_fields = ('display_name', 'widget_position', 'overlay_video', 'tabs', 'initial_state' , 'discussions_scope')
 
     has_author_view = True
 
@@ -108,9 +128,11 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'clientId': annoto_auth.get('client_id'),
             'horisontal': horisontal,
             'vertical': vertical,
-            'tabs':self.tabs,
+            'tabs': self.tabs,
+            'overlayVideo': self.overlay_video,
+            'initialState': self.initial_state,
             'privateThread': self.discussions_scope,
-            'displayName': self.get_parent().display_name,
+            'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
             'courseId': self.course_id.to_deprecated_string(),
