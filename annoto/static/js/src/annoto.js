@@ -29,7 +29,7 @@ function AnnotoXBlock(runtime, element, options) {
                 var videoWrapper;
                 
                 if (horizontalAlign === 'inner') {
-                    videoWrapper = el.find('div.video-wrapper');
+                    videoWrapper = el.find('div.video-wrapper').get(0);
                     openOnLoad = false;
                     enableTabs = false;
                 }
