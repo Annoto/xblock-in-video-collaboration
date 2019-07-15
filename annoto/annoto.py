@@ -37,12 +37,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     widget_position = String(
         display_name=_("Widget Position"),
         values=(
-            {'display_name': _('top-left'), 'value': 'top-left'},
-            {'display_name': _('top-right'), 'value': 'top-right'},
-            {'display_name': _('left'), 'value': 'left'},
-            {'display_name': _('right'), 'value': 'right'},
-            {'display_name': _('bottom-left'), 'value': 'bottom-left'},
-            {'display_name': _('bottom-right'), 'value': 'bottom-right'}
+            {'display_name': _('top-left'), 'value': 'left-top'},
+            {'display_name': _('top-right'), 'value': 'right-top'},
+            {'display_name': _('left'), 'value': 'left-center'},
+            {'display_name': _('right'), 'value': 'right-center'},
+            {'display_name': _('bottom-left'), 'value': 'left-bottom'},
+            {'display_name': _('bottom-right'), 'value': 'right-bottom'}
         ),
         default="top-left",
     )
@@ -99,11 +99,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     def get_position(self):
         """Parse 'widget_position' field"""
-        pos_list = self.widget_position.split('-')
-        horizontal = len(pos_list) > 1 and pos_list[1] or pos_list[0]
-        vertical = len(pos_list) > 1 and pos_list[0] or 'center'
-        return (horizontal, vertical)
-
+        return self.widget_position.split('-')
 
     def author_view(self, context=None):
         context = context or {}
