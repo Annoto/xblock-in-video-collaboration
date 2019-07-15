@@ -97,6 +97,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
 
     def author_view(self, context=None):
+        context = context or {}
         context['is_author_view'] = True
         return self._base_view(context=context)
 
@@ -105,6 +106,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         The primary view of the AnnotoXBlock, shown to students
         when viewing courses.
         """
+        context = context or {}
         context['is_author_view'] = False
         frag = self._base_view(context=context)
         frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
