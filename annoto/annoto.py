@@ -83,6 +83,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     has_author_view = True
 
+    @property
+    def i18n_service(self):
+        """ Obtains translation service """
+        i18n_service = self.runtime.service(self, "i18n")
+        if i18n_service:
+            return i18n_service
+        else:
+            return type('DummyTranslationService', (object,), {'gettext': _})()
+
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -148,8 +157,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         if not annoto_auth.get('client_id'):
             context['error']['type'] = 'warning'
             context['error']['messages'] = [
-                _('You did not provide annoto credentials. And you view it in demo mode.'),
-                _('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
+                self.i18n_service.gettext('You did not provide annoto credentials. And you view it in demo mode.'),
+                self.i18n_service.gettext('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
             ]
         else:
             try:
@@ -157,16 +166,16 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             except:
                 context['error']['type'] = 'error'
                 context['error']['messages'] = [
-                    _('"CLIENT_ID" is not a valid JWT token.'),
-                    _('Please provide valid "CLIENT_ID" in '
+                    self.i18n_service.gettext('"CLIENT_ID" is not a valid JWT token.'),
+                    self.i18n_service.gettext('Please provide valid "CLIENT_ID" in '
                       '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
                 ]
             else:
                 if not annoto_auth.get('client_secret'):
                     context['error']['type'] = 'error'
                     context['error']['messages'] = [
-                        _('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
-                        _('Please add "CLIENT_SECRET" to '
+                        self.i18n_service.gettext('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
+                        self.i18n_service.gettext('Please add "CLIENT_SECRET" to '
                           '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
                     ]
 
@@ -209,12 +218,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         """Generate JWT token for SSO authorization"""
         annoto_auth = self.get_annoto_settings()
         if not annoto_auth:
-            msg = _('Annoto authorization is not provided in "LTI Passports".')
+            msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
         user = self.runtime.service(self, 'user')._django_user
         if not user:
-            msg = _('Requested user does not exists.')
+            msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
 
         profile_name = hasattr(user, 'profile') and user.profile and user.profile.name
