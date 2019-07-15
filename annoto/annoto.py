@@ -100,9 +100,9 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def get_position(self):
         """Parse 'widget_position' field"""
         pos_list = self.widget_position.split('-')
-        horisontal = len(pos_list) > 1 and pos_list[1] or pos_list[0]
+        horizontal = len(pos_list) > 1 and pos_list[1] or pos_list[0]
         vertical = len(pos_list) > 1 and pos_list[0] or 'center'
-        return (horisontal, vertical)
+        return (horizontal, vertical)
 
 
     def author_view(self, context=None):
@@ -123,7 +123,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
-        horisontal, vertical = self.get_position()
+        horizontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
         lang = getattr(
             translator,
@@ -137,7 +137,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
         js_params = {
             'clientId': annoto_auth.get('client_id'),
-            'horisontal': horisontal,
+            'horizontal': horizontal,
             'vertical': vertical,
             'tabs': self.tabs,
             'overlayVideo': self.overlay_video,

@@ -44,7 +44,7 @@ function AnnotoXBlock(runtime, element, options) {
 
                 var config = {
                     clientId: options.clientId,
-                    position: options.horisontal,
+                    position: options.horizontal,
                     relativePositionElement: videoWrapper,
                     features: {
                         tabs: enableTabs,
