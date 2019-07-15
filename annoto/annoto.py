@@ -6,6 +6,7 @@ from webob import Response
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.template import Context, Template
+from django.contrib.auth.models import User
 
 import pkg_resources
 from xblock.core import XBlock
@@ -44,7 +45,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             {'display_name': _('bottom-left'), 'value': 'left-bottom'},
             {'display_name': _('bottom-right'), 'value': 'right-bottom'}
         ),
-        default="top-left",
+        default="left-top",
     )
 
     overlay_video = Boolean(
@@ -92,7 +93,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         else:
             return type('DummyTranslationService', (object,), {'gettext': _})()
 
-    def resource_string(self, path):
+    @staticmethod
+    def resource_string(path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
@@ -201,10 +203,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
         return {}
 
-    def _json_resp(self, data):
+    @staticmethod
+    def _json_resp(data):
         return Response(json.dumps(data))
 
-    def _build_absolute_uri(self, request, location):
+    @staticmethod
+    def _build_absolute_uri(request, location):
         _django_request = HttpRequest()
         _django_request.META = request.environ.copy()
         return _django_request.build_absolute_uri(location)
@@ -217,7 +221,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
-        user = self.runtime.service(self, 'user')._django_user
+        user = User.objects.get(id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id'))
         if not user:
             msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
