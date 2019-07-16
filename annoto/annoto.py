@@ -240,7 +240,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             scope = 'user'
 
         payload = {
-            'expire': int(time.time() + 60 * 20),
+            'exp': int(time.time() + 60 * 20),
             'iss': annoto_auth['client_id'],
             'jti': user.id,
             'name': name,
