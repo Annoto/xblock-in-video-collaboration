@@ -2,6 +2,7 @@
 function AnnotoXBlock(runtime, element, options) {
     var options = options;
     var getTokenUrl = runtime.handlerUrl(element, 'get_jwt_token');
+    var element = $(element);
 
     var factory = function() {
         $(function ($) {
@@ -15,6 +16,7 @@ function AnnotoXBlock(runtime, element, options) {
                             api.auth(data.token);
                         } else {
                             window.console && console.log('[Annoto] ERROR: ', data.msg);
+                            element.find('.annoto-block').html('Error loading Annoto XBlock.');
                         }
                     }
                 });
@@ -27,9 +29,9 @@ function AnnotoXBlock(runtime, element, options) {
                 var openOnLoad = true;
                 var enableTabs = true;
                 var videoWrapper;
-                
+
                 if (horizontalAlign === 'inner') {
-                    videoWrapper = el.find('div.video-wrapper');
+                    videoWrapper = el.find('div.video-wrapper')[0];
                     openOnLoad = false;
                     enableTabs = false;
                 }
@@ -37,14 +39,14 @@ function AnnotoXBlock(runtime, element, options) {
                 if (options.initialState !== 'auto') {
                     openOnLoad = !!(options.initialState === 'open');
                 }
-                
+
                 if (options.tabs !== 'auto') {
                     enableTabs = !!(options.tabs === 'enabled');
                 }
 
                 var config = {
                     clientId: options.clientId,
-                    position: options.horisontal,
+                    position: options.horizontal,
                     relativePositionElement: videoWrapper,
                     features: {
                         tabs: enableTabs,
@@ -103,11 +105,16 @@ function AnnotoXBlock(runtime, element, options) {
         });
     };
 
-    if (typeof require == 'function' && typeof Annoto != 'object') {
-        require(['//app.annoto.net/annoto-bootstrap.js'], function(Annoto) {
+    try {
+        if (typeof require == 'function' && typeof Annoto != 'object') {
+            require(['//app.annoto.net/annoto-bootstrap.js'], function(Annoto) {
+                factory();
+            });
+        } else {
             factory();
-        });
-    } else {
-        factory();
+        }
+    } catch (err) {
+        element.find('.annoto-block').html('Error loading Annoto XBlock.');
+        throw err;
     }
 }

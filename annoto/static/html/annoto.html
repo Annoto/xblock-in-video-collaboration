@@ -1,9 +1,12 @@
-<div class="annoto_block">
-{% if is_author_view and error %}
+<div class="annoto-block">
+{% if is_author_view %}
+    Annoto XBlock
+    {% if error %}
     <div class="annoto-{{ error.type }}">
       {% for msg in error.messages %}
         <p>{{ msg }}</p>
       {% endfor %}
     </div>
+    {% endif %}
 {% endif %}
 </div>
