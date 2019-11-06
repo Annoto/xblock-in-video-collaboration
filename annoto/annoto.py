@@ -12,7 +12,6 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
-from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
@@ -197,11 +196,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def _json_resp(self, data):
         return Response(json.dumps(data))
 
-    def _build_absolute_uri(self, request, location):
-        _django_request = HttpRequest()
-        _django_request.META = request.environ.copy()
-        return _django_request.build_absolute_uri(location)
-
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
         """Generate JWT token for SSO authorization"""
@@ -214,10 +208,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         if not user:
             msg = _('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
-
-        profile_name = hasattr(user, 'profile') and user.profile and user.profile.name
-        name = profile_name or user.get_full_name() or user.username
-        photo = self._build_absolute_uri(request, get_profile_image_urls_for_user(user)['small'])
 
         roles = user.courseaccessrole_set.filter(course_id=self.course_id).values_list('role', flat=True)
 
@@ -232,9 +222,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'expire': int(time.time() + 60 * 20),
             'iss': annoto_auth['client_id'],
             'jti': user.id,
-            'name': name,
-            'email': user.email,
-            'photoUrl': photo,
+            'name': user.username,
             'scope': scope
         }
 
