@@ -6,13 +6,13 @@ from webob import Response
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.template import Context, Template
+from django.contrib.auth.models import User
 
 import pkg_resources
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
-from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
@@ -37,14 +37,14 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     widget_position = String(
         display_name=_("Widget Position"),
         values=(
-            {'display_name': _('top-left'), 'value': 'top-left'},
-            {'display_name': _('top-right'), 'value': 'top-right'},
-            {'display_name': _('left'), 'value': 'left'},
-            {'display_name': _('right'), 'value': 'right'},
-            {'display_name': _('bottom-left'), 'value': 'bottom-left'},
-            {'display_name': _('bottom-right'), 'value': 'bottom-right'}
+            {'display_name': _('top-left'), 'value': 'left-top'},
+            {'display_name': _('top-right'), 'value': 'right-top'},
+            {'display_name': _('left'), 'value': 'left-center'},
+            {'display_name': _('right'), 'value': 'right-center'},
+            {'display_name': _('bottom-left'), 'value': 'left-bottom'},
+            {'display_name': _('bottom-right'), 'value': 'right-bottom'}
         ),
-        default="top-left",
+        default="left-top",
     )
 
     overlay_video = Boolean(
@@ -83,20 +83,27 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     has_author_view = True
 
-    def resource_string(self, path):
+    @property
+    def i18n_service(self):
+        """ Obtains translation service """
+        i18n_service = self.runtime.service(self, "i18n")
+        if i18n_service:
+            return i18n_service
+        else:
+            return type('DummyTranslationService', (object,), {'gettext': _})()
+
+    @staticmethod
+    def resource_string(path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
     def get_position(self):
         """Parse 'widget_position' field"""
-        pos_list = self.widget_position.split('-')
-        horisontal = len(pos_list) > 1 and pos_list[1] or pos_list[0]
-        vertical = len(pos_list) > 1 and pos_list[0] or 'center'
-        return (horisontal, vertical)
-
+        return self.widget_position.split('-')
 
     def author_view(self, context=None):
+        context = context or {}
         context['is_author_view'] = True
         return self._base_view(context=context)
 
@@ -105,6 +112,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         The primary view of the AnnotoXBlock, shown to students
         when viewing courses.
         """
+        context = context or {}
         context['is_author_view'] = False
         frag = self._base_view(context=context)
         frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
@@ -112,7 +120,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
-        horisontal, vertical = self.get_position()
+        horizontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
         lang = getattr(
             translator,
@@ -126,7 +134,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
         js_params = {
             'clientId': annoto_auth.get('client_id'),
-            'horisontal': horisontal,
+            'horizontal': horizontal,
             'vertical': vertical,
             'tabs': self.tabs,
             'overlayVideo': self.overlay_video,
@@ -146,8 +154,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         if not annoto_auth.get('client_id'):
             context['error']['type'] = 'warning'
             context['error']['messages'] = [
-                _('You did not provide annoto credentials. And you view it in demo mode.'),
-                _('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
+                self.i18n_service.gettext('You did not provide annoto credentials. And you view it in demo mode.'),
+                self.i18n_service.gettext('Please add "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>" to "Advanced Settings" > "LTI Passports"'),
             ]
         else:
             try:
@@ -155,16 +163,16 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             except:
                 context['error']['type'] = 'error'
                 context['error']['messages'] = [
-                    _('"CLIENT_ID" is not a valid JWT token.'),
-                    _('Please provide valid "CLIENT_ID" in '
+                    self.i18n_service.gettext('"CLIENT_ID" is not a valid JWT token.'),
+                    self.i18n_service.gettext('Please provide valid "CLIENT_ID" in '
                       '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
                 ]
             else:
                 if not annoto_auth.get('client_secret'):
                     context['error']['type'] = 'error'
                     context['error']['messages'] = [
-                        _('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
-                        _('Please add "CLIENT_SECRET" to '
+                        self.i18n_service.gettext('"CLIENT_SECRET" is required when "CLIENT_ID" provided.'),
+                        self.i18n_service.gettext('Please add "CLIENT_SECRET" to '
                           '"Advanced Settings" > "LTI Passports" > "annoto-auth:<CLIENT_ID>:<CLIENT_SECRET>"'),
                     ]
 
@@ -194,30 +202,22 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
         return {}
 
-    def _json_resp(self, data):
+    @staticmethod
+    def _json_resp(data):
         return Response(json.dumps(data))
-
-    def _build_absolute_uri(self, request, location):
-        _django_request = HttpRequest()
-        _django_request.META = request.environ.copy()
-        return _django_request.build_absolute_uri(location)
 
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
         """Generate JWT token for SSO authorization"""
         annoto_auth = self.get_annoto_settings()
         if not annoto_auth:
-            msg = _('Annoto authorization is not provided in "LTI Passports".')
+            msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
-        user = self.runtime.service(self, 'user')._django_user
+        user = User.objects.get(id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id'))
         if not user:
-            msg = _('Requested user does not exists.')
+            msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
-
-        profile_name = hasattr(user, 'profile') and user.profile and user.profile.name
-        name = profile_name or user.get_full_name() or user.username
-        photo = self._build_absolute_uri(request, get_profile_image_urls_for_user(user)['small'])
 
         roles = user.courseaccessrole_set.filter(course_id=self.course_id).values_list('role', flat=True)
 
@@ -229,12 +229,10 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             scope = 'user'
 
         payload = {
-            'expire': int(time.time() + 60 * 20),
+            'exp': int(time.time() + 60 * 20),
             'iss': annoto_auth['client_id'],
             'jti': user.id,
-            'name': name,
-            'email': user.email,
-            'photoUrl': photo,
+            'name': user.username,
             'scope': scope
         }
 
