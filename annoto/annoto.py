@@ -18,7 +18,7 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
-from .fields import NamedBoolean
+from .fields import NamedBoolean, Version
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 
 @XBlock.needs('i18n', 'user')
 class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
+    version = Version(display_name=_("Annoto XBlock version"))
 
     display_name = String(
         display_name=_("Display Name"),
@@ -80,7 +81,10 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default=True
     )
 
-    editable_fields = ('display_name', 'widget_position', 'overlay_video', 'tabs', 'initial_state' , 'discussions_scope')
+    editable_fields = (
+        'version', 'display_name', 'widget_position', 'overlay_video', 'tabs',
+        'initial_state', 'discussions_scope'
+    )
 
     has_author_view = True
 
@@ -98,6 +102,11 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
+
+    def studio_view(self, context):
+        fragment = super(AnnotoXBlock, self).studio_view(context)
+        fragment.add_javascript(self.resource_string("static/js/src/readonly_field.js"))
+        return fragment
 
     def get_position(self):
         """Parse 'widget_position' field"""
