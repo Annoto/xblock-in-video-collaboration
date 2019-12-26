@@ -1,6 +1,5 @@
 import six
-import pkg_resources
-from xblock.fields import JSONField, UNSET, Scope, String
+from xblock.fields import JSONField, UNSET, Scope
 
 
 class NamedBoolean(JSONField):
@@ -28,17 +27,3 @@ class NamedBoolean(JSONField):
             return bool(value)
 
     enforce_type = from_json
-
-
-class Version(String):
-    def _get_cached_value(self, xblock):
-        return pkg_resources.require('annoto-xblock')[0].version
-
-    def _set_cached_value(self, xblock, value):
-        pass
-
-    def _del_cached_value(self, xblock):
-        pass
-
-    def _is_dirty(self, xblock):
-        return False

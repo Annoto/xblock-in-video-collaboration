@@ -18,7 +18,7 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
-from .fields import NamedBoolean, Version
+from .fields import NamedBoolean
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -28,8 +28,6 @@ log = logging.getLogger(__name__)
 
 @XBlock.needs('i18n', 'user')
 class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
-    version = Version(display_name=_("Annoto XBlock version"))
-
     display_name = String(
         display_name=_("Display Name"),
         help=_("Display name for this module"),
@@ -82,7 +80,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     editable_fields = (
-        'version', 'display_name', 'widget_position', 'overlay_video', 'tabs',
+        'display_name', 'widget_position', 'overlay_video', 'tabs',
         'initial_state', 'discussions_scope'
     )
 
@@ -103,11 +101,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
-    def studio_view(self, context):
-        fragment = super(AnnotoXBlock, self).studio_view(context)
-        fragment.add_javascript(self.resource_string("static/js/src/readonly_field.js"))
-        return fragment
-
     def get_position(self):
         """Parse 'widget_position' field"""
         return self.widget_position.split('-')
@@ -127,6 +120,33 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         frag = self._base_view(context=context)
         frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
         return frag
+
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock
+        """
+        context = {
+            'fields': [],
+            'xblock_version': pkg_resources.require('annoto-xblock')[0].version
+        }
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+
+        template = Template(self.resource_string("static/html/studio_edit.html"))
+        fragment = Fragment(template.render(Context(context)))
+        fragment.add_javascript(self.resource_string('static/js/src/studio_edit.js'))
+        fragment.initialize_js('StudioEditableXBlockMixin')
+
+        return fragment
 
     def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
