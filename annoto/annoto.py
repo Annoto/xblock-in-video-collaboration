@@ -15,6 +15,7 @@ from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.course_groups.cohorts import get_cohort
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
@@ -162,6 +163,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         course = self.get_course_obj()
         course_overview = CourseOverview.objects.get(id=self.course_id)
 
+        course_id = str(self.course_id)
+        course_display_name = course.display_name
+        user = self._get_user()
+        if user:
+            cohort = get_cohort(user, self.course_id)
+            if cohort:
+                course_id = u'{}_{}'.format(course_id, cohort.id)
+                course_display_name = u'{} [{}]'.format(course_display_name, cohort.name)
+
         js_params = {
             'clientId': annoto_auth.get('client_id'),
             'horizontal': horizontal,
@@ -173,8 +183,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
-            'courseId': self.course_id.to_deprecated_string(),
-            'courseDisplayName': course.display_name,
+            'courseId': course_id,
+            'courseDisplayName': course_display_name,
             'courseDescription': course_overview.short_description,
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
@@ -242,6 +252,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         _django_request.META = request.environ.copy()
         return _django_request.build_absolute_uri(location)
 
+    def _get_user(self):
+        user = User.objects.filter(
+            id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id')
+        ).first()
+        return user
+
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
         """Generate JWT token for SSO authorization"""
@@ -250,7 +266,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
-        user = User.objects.get(id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id'))
+        user = self._get_user()
         if not user:
             msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
