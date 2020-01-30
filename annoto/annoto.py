@@ -19,8 +19,6 @@ from openedx.core.djangoapps.course_groups.cohorts import get_cohort
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
-from .fields import NamedBoolean
-
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
 
@@ -73,11 +71,14 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="auto",
     )
 
-    discussions_scope = NamedBoolean(
+    discussions_scope = String(
         display_name=_('Discussions Scope'),
-        display_true=_('Private per course'),
-        display_false=_('Site Wide'),
-        default=True
+        values=(
+            {'display_name': _('Private per course cohort'), 'value': 'cohort'},
+            {'display_name': _('Private per course'), 'value': 'course'},
+            {'display_name': _('Site Wide'), 'value': 'site'},
+        ),
+        default='cohort'
     )
 
     editable_fields = (
@@ -166,7 +167,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         course_id = str(self.course_id)
         course_display_name = course.display_name
         user = self._get_user()
-        if user:
+        if user and self.discussions_scope == 'cohort':
             cohort = get_cohort(user, self.course_id)
             if cohort:
                 course_id = u'{}_{}'.format(course_id, cohort.id)
@@ -179,7 +180,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'tabs': self.tabs,
             'overlayVideo': self.overlay_video,
             'initialState': self.initial_state,
-            'privateThread': self.discussions_scope,
+            'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
