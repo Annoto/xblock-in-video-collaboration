@@ -55,11 +55,11 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     tabs = String(
         display_name=_("Tabs"),
         values=(
-            {'display_name': _('Auto'), 'value': 'auto'},
             {'display_name': _('Enabled'), 'value': 'enabled'},
-            {'display_name': _('Hidden'), 'value': 'hidden'}
+            {'display_name': _('Hidden'), 'value': 'hidden'},
+            {'display_name': _('Auto'), 'value': 'auto'},
         ),
-        default="auto",
+        default="enabled",
     )
 
     initial_state = String(
