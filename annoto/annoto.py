@@ -81,9 +81,18 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default='cohort'
     )
 
+    video_type = String(
+        display_name=_("Video Type"),
+        values=(
+            {'display_name': _('Video On-Demand'), 'value': 'ondemand'},
+            {'display_name': _('Live Streaming'), 'value': 'stream'},
+        ),
+        default="ondemand",
+    )
+
     editable_fields = (
         'display_name', 'widget_position', 'overlay_video', 'tabs',
-        'initial_state', 'discussions_scope'
+        'initial_state', 'discussions_scope', 'video_type'
     )
 
     has_author_view = True
@@ -189,6 +198,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'courseDescription': course_overview.short_description,
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
+            'isLive': self.video_type == 'stream',
         }
 
         context['error'] = {}
