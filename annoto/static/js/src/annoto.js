@@ -65,6 +65,9 @@ function AnnotoXBlock(runtime, element, options) {
                             player: {
                                 type: 'openedx',
                                 element: playerId,
+                                params: {
+                                    isLive: options.isLive
+                                },
                                 mediaDetails: function(details) {
                                     var extendedDetails = {
                                         title: options.mediaTitle,

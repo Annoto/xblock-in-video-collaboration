@@ -30,7 +30,7 @@ class AnnotoXBlockTests(unittest.TestCase):
         self.assertEqual(block.display_name, 'Annoto')
         self.assertEqual(block.widget_position, 'top-left')
         self.assertTrue(block.overlay_video)
-        self.assertEqual(block.tabs, 'auto')
+        self.assertEqual(block.tabs, 'enabled')
         self.assertEqual(block.initial_state, 'auto')
         self.assertTrue(block.discussions_scope)
 
