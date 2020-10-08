@@ -14,10 +14,9 @@ from xblock.fields import Scope, String, Boolean
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.course_groups.cohorts import get_cohort
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
-
-from .fields import NamedBoolean
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -27,7 +26,6 @@ log = logging.getLogger(__name__)
 
 @XBlock.needs('i18n', 'user')
 class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
-
     display_name = String(
         display_name=_("Display Name"),
         help=_("Display name for this module"),
@@ -55,11 +53,11 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     tabs = String(
         display_name=_("Tabs"),
         values=(
-            {'display_name': _('Auto'), 'value': 'auto'},
             {'display_name': _('Enabled'), 'value': 'enabled'},
-            {'display_name': _('Hidden'), 'value': 'hidden'}
+            {'display_name': _('Hidden'), 'value': 'hidden'},
+            {'display_name': _('Auto'), 'value': 'auto'},
         ),
-        default="auto",
+        default="enabled",
     )
 
     initial_state = String(
@@ -72,14 +70,29 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="auto",
     )
 
-    discussions_scope = NamedBoolean(
+    discussions_scope = String(
         display_name=_('Discussions Scope'),
-        display_true=_('Private per course'),
-        display_false=_('Site Wide'),
-        default=True
+        values=(
+            {'display_name': _('Private per course cohort'), 'value': 'cohort'},
+            {'display_name': _('Private per course'), 'value': 'course'},
+            {'display_name': _('Site Wide'), 'value': 'site'},
+        ),
+        default='cohort'
     )
 
-    editable_fields = ('display_name', 'widget_position', 'overlay_video', 'tabs', 'initial_state' , 'discussions_scope')
+    video_type = String(
+        display_name=_("Video Type"),
+        values=(
+            {'display_name': _('Video On-Demand'), 'value': 'ondemand'},
+            {'display_name': _('Live Streaming'), 'value': 'stream'},
+        ),
+        default="ondemand",
+    )
+
+    editable_fields = (
+        'display_name', 'widget_position', 'overlay_video', 'tabs',
+        'initial_state', 'discussions_scope', 'video_type'
+    )
 
     has_author_view = True
 
@@ -118,6 +131,33 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
         return frag
 
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock
+        """
+        context = {
+            'fields': [],
+            'xblock_version': pkg_resources.require('annoto-xblock')[0].version
+        }
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+
+        template = Template(self.resource_string("static/html/studio_edit.html"))
+        fragment = Fragment(template.render(Context(context)))
+        fragment.add_javascript(self.resource_string('static/js/src/studio_edit.js'))
+        fragment.initialize_js('StudioEditableXBlockMixin')
+
+        return fragment
+
     def _base_view(self, context=None):
         annoto_auth = self.get_annoto_settings()
         horizontal, vertical = self.get_position()
@@ -132,6 +172,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         course = self.get_course_obj()
         course_overview = CourseOverview.objects.get(id=self.course_id)
 
+        course_id = str(self.course_id)
+        course_display_name = course.display_name
+        user = self._get_user()
+        if user and self.discussions_scope == 'cohort':
+            cohort = get_cohort(user, self.course_id)
+            if cohort:
+                course_id = u'{}_{}'.format(course_id, cohort.id)
+                course_display_name = u'{} [{}]'.format(course_display_name, cohort.name)
+
         js_params = {
             'clientId': annoto_auth.get('client_id'),
             'horizontal': horizontal,
@@ -139,15 +188,16 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'tabs': self.tabs,
             'overlayVideo': self.overlay_video,
             'initialState': self.initial_state,
-            'privateThread': self.discussions_scope,
+            'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
-            'courseId': self.course_id.to_deprecated_string(),
-            'courseDisplayName': course.display_name,
+            'courseId': course_id,
+            'courseDisplayName': course_display_name,
             'courseDescription': course_overview.short_description,
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
+            'isLive': self.video_type == 'stream',
         }
 
         context['error'] = {}
@@ -206,6 +256,18 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def _json_resp(data):
         return Response(json.dumps(data))
 
+    @staticmethod
+    def _build_absolute_uri(request, location):
+        _django_request = HttpRequest()
+        _django_request.META = request.environ.copy()
+        return _django_request.build_absolute_uri(location)
+
+    def _get_user(self):
+        user = User.objects.filter(
+            id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id')
+        ).first()
+        return user
+
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
         """Generate JWT token for SSO authorization"""
@@ -214,7 +276,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
-        user = User.objects.get(id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id'))
+        user = self._get_user()
         if not user:
             msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
