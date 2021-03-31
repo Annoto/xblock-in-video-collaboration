@@ -50,6 +50,8 @@ function AnnotoXBlock(runtime, element, options) {
                     relativePositionElement: videoWrapper,
                     features: {
                         tabs: enableTabs,
+                        comments: options.comments,
+                        privateNotes: options.privateNotes
                     },
                     locale: options.language,
                     rtl: options.rtl,

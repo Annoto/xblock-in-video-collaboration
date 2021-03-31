@@ -33,6 +33,7 @@ class AnnotoXBlockTests(unittest.TestCase):
         self.assertEqual(block.tabs, 'enabled')
         self.assertEqual(block.initial_state, 'auto')
         self.assertTrue(block.discussions_scope)
+        self.assertEqual(block.features, 'comments_notes')
 
     def test_set_fields_custom_values(self):
         block = self.make_one()
@@ -43,7 +44,8 @@ class AnnotoXBlockTests(unittest.TestCase):
             'overlay_video': False,
             'tabs': 'hidden',
             'initial_state': 'open',
-            'discussions_scope': False
+            'discussions_scope': False,
+            'features': 'only_analytics',
         }
 
         block.submit_studio_edits(mock.Mock(method="POST",
@@ -55,6 +57,7 @@ class AnnotoXBlockTests(unittest.TestCase):
         self.assertEqual(block.tabs, 'hidden')
         self.assertEqual(block.initial_state, 'open')
         self.assertFalse(block.discussions_scope)
+        self.assertEqual(block.features, 'only_analytics')
 
     def test_position_parser(self):
         block = self.make_one()
