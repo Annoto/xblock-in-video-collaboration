@@ -51,7 +51,8 @@ function AnnotoXBlock(runtime, element, options) {
                     features: {
                         tabs: enableTabs,
                         comments: options.comments,
-                        privateNotes: options.privateNotes
+                        privateNotes: options.privateNotes,
+                        timeline: options.comments || options.privateNotes
                     },
                     locale: options.language,
                     rtl: options.rtl,
