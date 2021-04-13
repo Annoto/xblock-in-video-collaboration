@@ -90,9 +90,20 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="ondemand",
     )
 
+    features = String(
+        display_name=_("Features"),
+        values=(
+            {'display_name': _('Comments & Notes'), 'value': 'comments_notes'},
+            {'display_name': _('Comments'), 'value': 'comments'},
+            {'display_name': _('Private Notes'), 'value': 'notes'},
+            {'display_name': _('Only Analytics'), 'value': 'only_analytics'},
+        ),
+        default="comments_and_notes",
+    )
+
     editable_fields = (
         'display_name', 'widget_position', 'overlay_video', 'tabs',
-        'initial_state', 'discussions_scope', 'video_type'
+        'initial_state', 'discussions_scope', 'video_type', 'features',
     )
 
     has_author_view = True
@@ -199,6 +210,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
             'isLive': self.video_type == 'stream',
+            'comments': 'comments' in self.features,
+            'privateNotes': 'notes' in self.features,
         }
 
         context['error'] = {}
