@@ -8,7 +8,7 @@ https://docs.annoto.net/setup/openedx/widget-integration-xblock
 **Information about Annoto disscusion widget and Insights dashboard:**
 https://docs.annoto.net/guides/
 
-**Information Annoto API:**
+**Information about Annoto API:**
 https://docs.annoto.net/developers/
 
 ## Installation
