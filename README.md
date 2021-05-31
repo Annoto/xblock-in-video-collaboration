@@ -1,11 +1,11 @@
 # xblock-in-video-collaboration
 Annoto is an in-video collaboration solution that turns static, 1-way video Stream/VOD into an active and interactive group experience, where participants contribute, share and learn together.  Users can lean forward and become participants and not just passive and lonely viewers, causing all users to be actively involved and return to the video content, sharing more ideas and creating more meaningful content. Resulting in higher engagement and retention, supported by comprehensive analytics and insights, that facilitate dramatic improvements to content, communications, and measurable outcomes.
 
-# Visit our online documention
-**Information about the xBlock:**
+# Visit our online documentation
+**Information about the XBlock:**
 https://docs.annoto.net/setup/openedx/widget-integration-xblock
 
-**Information about Annoto disscusion widget and Insights dashboard:**
+**Information about Annoto discussion widget and Insights dashboard:**
 https://docs.annoto.net/guides/
 
 **Information about Annoto API:**

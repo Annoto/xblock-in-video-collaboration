@@ -93,7 +93,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     features = String(
         display_name=_("Features"),
         values=(
-            {'display_name': _('Comments & Notes'), 'value': 'comments_notes'},
+            {'display_name': _('Comments & Notes'), 'value': 'comments_and_notes'},
             {'display_name': _('Comments'), 'value': 'comments'},
             {'display_name': _('Private Notes'), 'value': 'notes'},
             {'display_name': _('Only Analytics'), 'value': 'only_analytics'},
@@ -140,7 +140,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         context = context or {}
         context['is_author_view'] = False
         frag = self._base_view(context=context)
-        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
+        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js')
         return frag
 
     def studio_view(self, context):
