@@ -15,7 +15,6 @@ from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from openedx.core.djangoapps.course_groups.cohorts import get_cohort
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
@@ -187,7 +186,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         course_id = str(self.course_id)
         course_display_name = course.display_name
         user = self._get_user()
-        if user and self.discussions_scope == 'cohort':
+        if not context['is_author_view'] and user and self.discussions_scope == 'cohort':
+            from openedx.core.djangoapps.course_groups.cohorts import get_cohort
             cohort = get_cohort(user, self.course_id)
             if cohort:
                 course_id = u'{}_{}'.format(course_id, cohort.id)
