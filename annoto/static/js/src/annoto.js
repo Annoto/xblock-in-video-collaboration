@@ -107,7 +107,7 @@ function AnnotoXBlock(runtime, element, options) {
                 Annoto.boot(config);
             };
 
-            $('.xmodule_VideoModule .video').first().on('ready', setupAnnoto);
+            $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video').first().on('ready', setupAnnoto);
         });
     };
 
