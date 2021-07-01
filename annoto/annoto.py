@@ -319,4 +319,4 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
         token = jwt.encode(payload, annoto_auth['client_secret'], algorithm='HS256')
-        return self._json_resp({'status': 'ok', 'token': str(token)})
+        return self._json_resp({'status': 'ok', 'token': token})
