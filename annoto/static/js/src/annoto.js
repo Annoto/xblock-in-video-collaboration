@@ -93,6 +93,7 @@ function AnnotoXBlock(runtime, element, options) {
                                 }
                             },
                             openOnLoad: openOnLoad,
+                            kukuCloseOnLoad: true,
                             timeline: {
                                 overlayVideo: true,
                             }
