@@ -32,6 +32,13 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="Annoto",
         scope=Scope.settings,
     )
+
+    video_block_id = String(
+        display_name=_("Video ID"),
+        help=_("This is the component ID for the video in which you want to insert your quiz question."),
+        default=None,
+    )
+
     widget_position = String(
         display_name=_("Widget Position"),
         values=(
@@ -101,7 +108,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     editable_fields = (
-        'display_name', 'widget_position', 'overlay_video', 'tabs',
+        'display_name', 'video_block_id', 'widget_position', 'overlay_video', 'tabs',
         'initial_state', 'discussions_scope', 'video_type', 'features',
     )
 
@@ -212,6 +219,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'isLive': self.video_type == 'stream',
             'comments': 'comments' in self.features,
             'privateNotes': 'notes' in self.features,
+            'videoBlockID': self.video_block_id,
         }
 
         context['error'] = {}
