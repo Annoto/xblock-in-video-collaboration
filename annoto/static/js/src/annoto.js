@@ -6,6 +6,7 @@ function AnnotoXBlock(runtime, element, options) {
 
     var factory = function() {
         $(function ($) {
+            var videoElement;
             var annotoAuth = function(api) {
                 var api = api;
                 $.ajax({
@@ -92,6 +93,7 @@ function AnnotoXBlock(runtime, element, options) {
                                 }
                             },
                             openOnLoad: openOnLoad,
+                            kukuCloseOnLoad: true,
                             timeline: {
                                 overlayVideo: true,
                             }
@@ -107,7 +109,12 @@ function AnnotoXBlock(runtime, element, options) {
                 Annoto.boot(config);
             };
 
-            $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video').first().on('ready', setupAnnoto);
+            if (options.videoBlockID) {
+                videoElement = $('#video_' + options.videoBlockID);
+                videoElement = videoElement.length && videoElement || undefined;
+            }
+            videoElement = videoElement || $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video');
+            videoElement.first().on('ready', setupAnnoto);
         });
     };
 
