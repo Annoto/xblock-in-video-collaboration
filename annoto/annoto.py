@@ -35,7 +35,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     video_block_id = String(
         display_name=_("Video ID"),
-        help=_("This is the component ID for the video in which you want to insert your quiz question."),
+        help=_("This is the component ID for the video in which you want Annoto to appear."),
         default=None,
     )
 
