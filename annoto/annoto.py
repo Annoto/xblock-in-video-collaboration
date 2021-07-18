@@ -44,7 +44,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             {'display_name': _('bottom-left'), 'value': 'left-bottom'},
             {'display_name': _('bottom-right'), 'value': 'right-bottom'}
         ),
-        default="left-top",
+        default="right-top",
     )
 
     overlay_video = Boolean(
@@ -69,7 +69,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             {'display_name': _('Open'), 'value': 'open'},
             {'display_name': _('Closed'), 'value': 'closed'}
         ),
-        default="auto",
+        default="open",
     )
 
     discussions_scope = NamedBoolean(
