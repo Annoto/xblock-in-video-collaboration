@@ -18,8 +18,6 @@ from openedx.core.djangoapps.content.course_overviews.models import CourseOvervi
 from openedx.core.lib.courses import course_image_url
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
-from .fields import NamedBoolean
-
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
 
@@ -72,16 +70,39 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="open",
     )
 
-    discussions_scope = NamedBoolean(
+    discussions_scope = String(
         display_name=_('Discussions Scope'),
-        display_true=_('Private per course'),
-        display_false=_('Site Wide'),
-        default=True
+        values=(
+            {'display_name': _('Private per course cohort'), 'value': 'cohort'},
+            {'display_name': _('Private per course'), 'value': 'course'},
+            {'display_name': _('Site Wide'), 'value': 'site'},
+        ),
+        default='cohort'
+    )
+
+    video_type = String(
+        display_name=_("Video Type"),
+        values=(
+            {'display_name': _('Video On-Demand'), 'value': 'ondemand'},
+            {'display_name': _('Live Streaming'), 'value': 'stream'},
+        ),
+        default="ondemand",
+    )
+
+    features = String(
+        display_name=_("Features"),
+        values=(
+            {'display_name': _('Comments & Notes'), 'value': 'comments_and_notes'},
+            {'display_name': _('Comments'), 'value': 'comments'},
+            {'display_name': _('Private Notes'), 'value': 'notes'},
+            {'display_name': _('Only Analytics'), 'value': 'only_analytics'},
+        ),
+        default="comments_and_notes",
     )
 
     editable_fields = (
         'display_name', 'widget_position', 'overlay_video', 'tabs',
-        'initial_state', 'discussions_scope'
+        'initial_state', 'discussions_scope', 'video_type', 'features',
     )
 
     has_author_view = True
@@ -118,7 +139,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         context = context or {}
         context['is_author_view'] = False
         frag = self._base_view(context=context)
-        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js');
+        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js')
         return frag
 
     def studio_view(self, context):
@@ -162,6 +183,16 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         course = self.get_course_obj()
         course_overview = CourseOverview.objects.get(id=self.course_id)
 
+        course_id = str(self.course_id)
+        course_display_name = course.display_name
+        user = self._get_user()
+        if not context['is_author_view'] and user and self.discussions_scope == 'cohort':
+            from openedx.core.djangoapps.course_groups.cohorts import get_cohort
+            cohort = get_cohort(user, self.course_id)
+            if cohort:
+                course_id = u'{}_{}'.format(course_id, cohort.id)
+                course_display_name = u'{} [{}]'.format(course_display_name, cohort.name)
+
         js_params = {
             'clientId': annoto_auth.get('client_id'),
             'horizontal': horizontal,
@@ -169,15 +200,18 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'tabs': self.tabs,
             'overlayVideo': self.overlay_video,
             'initialState': self.initial_state,
-            'privateThread': self.discussions_scope,
+            'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
             'language': lang,
             'rtl': rtl,
-            'courseId': self.course_id.to_deprecated_string(),
-            'courseDisplayName': course.display_name,
+            'courseId': course_id,
+            'courseDisplayName': course_display_name,
             'courseDescription': course_overview.short_description,
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
+            'isLive': self.video_type == 'stream',
+            'comments': 'comments' in self.features,
+            'privateNotes': 'notes' in self.features,
         }
 
         context['error'] = {}
@@ -242,6 +276,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         _django_request.META = request.environ.copy()
         return _django_request.build_absolute_uri(location)
 
+    def _get_user(self):
+        user = User.objects.filter(
+            id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id')
+        ).first()
+        return user
+
     @XBlock.handler
     def get_jwt_token(self, request, suffix=''):
         """Generate JWT token for SSO authorization"""
@@ -250,7 +290,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             msg = self.i18n_service.gettext('Annoto authorization is not provided in "LTI Passports".')
             return self._json_resp({'status': 'error', 'msg': msg})
 
-        user = User.objects.get(id=self.runtime.service(self, 'user').get_current_user().opt_attrs.get('edx-platform.user_id'))
+        user = self._get_user()
         if not user:
             msg = self.i18n_service.gettext('Requested user does not exists.')
             return self._json_resp({'status': 'error', 'msg': msg})
@@ -279,4 +319,4 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
         token = jwt.encode(payload, annoto_auth['client_secret'], algorithm='HS256')
-        return self._json_resp({'status': 'ok', 'token': token})
+        return self._json_resp({'status': 'ok', 'token': getattr(token, 'decode', lambda: token)()})

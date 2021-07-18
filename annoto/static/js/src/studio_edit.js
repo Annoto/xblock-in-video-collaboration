@@ -1,7 +1,7 @@
 /* Javascript for StudioEditableXBlockMixin. */
 function StudioEditableXBlockMixin(runtime, element) {
     "use strict";
-    
+
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin

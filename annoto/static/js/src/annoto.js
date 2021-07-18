@@ -50,6 +50,9 @@ function AnnotoXBlock(runtime, element, options) {
                     relativePositionElement: videoWrapper,
                     features: {
                         tabs: enableTabs,
+                        comments: options.comments,
+                        privateNotes: options.privateNotes,
+                        timeline: options.comments || options.privateNotes
                     },
                     locale: options.language,
                     rtl: options.rtl,
@@ -65,6 +68,9 @@ function AnnotoXBlock(runtime, element, options) {
                             player: {
                                 type: 'openedx',
                                 element: playerId,
+                                params: {
+                                    isLive: options.isLive
+                                },
                                 mediaDetails: function(details) {
                                     var extendedDetails = {
                                         title: options.mediaTitle,
@@ -101,7 +107,7 @@ function AnnotoXBlock(runtime, element, options) {
                 Annoto.boot(config);
             };
 
-            $('.xmodule_VideoModule .video').first().on('ready', setupAnnoto);
+            $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video').first().on('ready', setupAnnoto);
         });
     };
 
