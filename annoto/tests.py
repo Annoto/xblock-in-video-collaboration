@@ -28,10 +28,10 @@ class AnnotoXBlockTests(unittest.TestCase):
     def test_default_filelds_values(self):
         block = self.make_one()
         self.assertEqual(block.display_name, 'Annoto')
-        self.assertEqual(block.widget_position, 'top-left')
-        self.assertTrue(block.overlay_video)
+        self.assertEqual(block.widget_position, 'top-right')
+        self.assertFalse(block.overlay_video)
         self.assertEqual(block.tabs, 'enabled')
-        self.assertEqual(block.initial_state, 'auto')
+        self.assertEqual(block.initial_state, 'open')
         self.assertTrue(block.discussions_scope)
 
     def test_set_fields_custom_values(self):
