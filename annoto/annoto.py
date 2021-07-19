@@ -312,7 +312,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'exp': int(time.time() + 60 * 20),
             'iss': annoto_auth['client_id'],
             'jti': user.id,
-            'name': profile_name,
+            'name': user.username,
             'email': user.email,
             'photoUrl': photo,
             'scope': scope
