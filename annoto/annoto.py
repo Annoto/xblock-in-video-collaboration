@@ -216,7 +216,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'horizontal': horizontal,
             'vertical': vertical,
             'tabs': self.tabs,
-            'overlayVideo': self.object_type == 'video' and self.overlay_video or False,
+            'overlayVideo': self.overlay_video,
             'initialState': self.initial_state,
             'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
