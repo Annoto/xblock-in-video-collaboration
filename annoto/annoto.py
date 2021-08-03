@@ -32,6 +32,13 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="Annoto",
         scope=Scope.settings,
     )
+
+    video_block_id = String(
+        display_name=_("Video ID"),
+        help=_("This is the component ID for the video in which you want Annoto to appear."),
+        default=None,
+    )
+
     widget_position = String(
         display_name=_("Widget Position"),
         values=(
@@ -43,6 +50,15 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             {'display_name': _('bottom-right'), 'value': 'right-bottom'}
         ),
         default="right-top",
+    )
+
+    object_type = String(
+        display_name=_("Learning Object Type"),
+        values=(
+            {'display_name': _('Video'), 'value': 'openedx'},
+            {'display_name': _('Page'), 'value': 'page'},
+        ),
+        default="openedx",
     )
 
     overlay_video = Boolean(
@@ -101,8 +117,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     editable_fields = (
-        'display_name', 'widget_position', 'overlay_video', 'tabs',
-        'initial_state', 'discussions_scope', 'video_type', 'features',
+        'display_name', 'video_block_id', 'object_type', 'widget_position', 'overlay_video',
+        'tabs', 'initial_state', 'discussions_scope', 'video_type', 'features',
     )
 
     has_author_view = True
@@ -170,6 +186,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         return fragment
 
     def _base_view(self, context=None):
+        context = context is None and {'is_author_view': False} or context
         annoto_auth = self.get_annoto_settings()
         horizontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
@@ -194,11 +211,12 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
                 course_display_name = u'{} [{}]'.format(course_display_name, cohort.name)
 
         js_params = {
+            'objectType': self.object_type,
             'clientId': annoto_auth.get('client_id'),
             'horizontal': horizontal,
             'vertical': vertical,
             'tabs': self.tabs,
-            'overlayVideo': self.overlay_video,
+            'overlayVideo': self.object_type == 'video' and self.overlay_video or False,
             'initialState': self.initial_state,
             'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
@@ -212,6 +230,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'isLive': self.video_type == 'stream',
             'comments': 'comments' in self.features,
             'privateNotes': 'notes' in self.features,
+            'videoBlockID': self.video_block_id,
         }
 
         context['error'] = {}
