@@ -63,7 +63,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
 
     overlay_video = Boolean(
         display_name=_("Overlay Video"),
-        default=True
+        default=False
     )
 
     tabs = String(
