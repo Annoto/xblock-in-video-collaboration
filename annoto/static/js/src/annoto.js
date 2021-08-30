@@ -3,7 +3,6 @@ function AnnotoXBlock(runtime, element, options) {
     var options = options;
     var getTokenUrl = runtime.handlerUrl(element, 'get_jwt_token');
     var element = $(element);
-    var annotoAPI;
 
     var factory = function() {
         $(function ($) {
@@ -22,7 +21,7 @@ function AnnotoXBlock(runtime, element, options) {
                         }
                     }
                 });
-            };
+            }
 
             var setupAnnoto = function (e) {
                 var el = $(e.target);
@@ -122,31 +121,12 @@ function AnnotoXBlock(runtime, element, options) {
                     };
                 }
 
-                self.annotoAPI ? initChatPlugin() : loadChatPlugin();
-
-            };
-
-            var initChatPlugin = function (e) {
                 Annoto.on('ready', function (api) {
-                    annotoAPI = api;
                     annotoAuth(api);
                 });
-                
-                Annoto.boot(self.config);
-            };
 
-            var loadChatPlugin = function (e) {
-                self.annotoAPI.close().then( function(){    
-                    self.annotoAPI.load(self.config, function(err) {
-                        if (err) {
-                            window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
-                            return;
-                        }
-                        window.console && console.log('Annoto xBlock: Loaded new Configuration!');
-                    });
-                });
+                Annoto.boot(config);
             };
-
 
             if (options.videoBlockID) {
                 videoElement = $('#video_' + options.videoBlockID);
