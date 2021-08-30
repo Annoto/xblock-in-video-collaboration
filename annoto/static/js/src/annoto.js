@@ -22,7 +22,7 @@ function AnnotoXBlock(runtime, element, options) {
                         }
                     }
                 });
-            }
+            };
 
             var setupAnnoto = function (e) {
                 var el = $(e.target);
