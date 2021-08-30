@@ -3,6 +3,7 @@ function AnnotoXBlock(runtime, element, options) {
     var options = options;
     var getTokenUrl = runtime.handlerUrl(element, 'get_jwt_token');
     var element = $(element);
+    var annotoAPI;
 
     var factory = function() {
         $(function ($) {
@@ -135,16 +136,16 @@ function AnnotoXBlock(runtime, element, options) {
             };
 
             var loadChatPlugin = function (e) {
-                self.annotoAPI.close().then(function(){    
-                        self.annotoAPI.load(self.config, function(err) {
-                            if (err) {
-                                window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
-                                return;
-                            }
-                            window.console && console.log(('Annoto xBlock: Loaded new Configuration!');
-                        });
-                    }
-          };
+                self.annotoAPI.close().then( function(){    
+                    self.annotoAPI.load(self.config, function(err) {
+                        if (err) {
+                            window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
+                            return;
+                        }
+                        window.console && console.log('Annoto xBlock: Loaded new Configuration!');
+                    });
+                });
+            };
 
 
             if (options.videoBlockID) {
