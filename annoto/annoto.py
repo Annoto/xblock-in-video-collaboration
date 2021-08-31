@@ -117,7 +117,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     editable_fields = (
-        'display_name', 'video_block_id', 'object_type', 'widget_position', 'overlay_video',
+        'display_name', 'object_type', 'video_block_id', 'widget_position', 'overlay_video',
         'tabs', 'initial_state', 'discussions_scope', 'video_type', 'features',
     )
 
