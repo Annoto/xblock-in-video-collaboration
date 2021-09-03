@@ -3,7 +3,7 @@ function AnnotoXBlock(runtime, element, options) {
     var options = options;
     var getTokenUrl = runtime.handlerUrl(element, 'get_jwt_token');
     var element = $(element);
-    var annotoAPI;
+    var annotoAPI,config;
 
     var factory = function() {
         $(function ($) {
@@ -53,7 +53,7 @@ function AnnotoXBlock(runtime, element, options) {
                     enableTabs = !!(options.tabs === 'enabled');
                 }
 
-                var config = {
+                config = {
                     clientId: options.clientId,
                     position: options.horizontal,
                     relativePositionElement: videoWrapper,
@@ -122,7 +122,7 @@ function AnnotoXBlock(runtime, element, options) {
                     };
                 }
 
-                self.annotoAPI ? initChatPlugin() : loadChatPlugin();
+                annotoAPI ? loadChatPlugin(): initChatPlugin();
 
             };
 
@@ -132,12 +132,12 @@ function AnnotoXBlock(runtime, element, options) {
                     annotoAuth(api);
                 });
                 
-                Annoto.boot(self.config);
+                Annoto.boot(config);
             };
 
             var loadChatPlugin = function (e) {
-                self.annotoAPI.close().then( function(){    
-                    self.annotoAPI.load(self.config, function(err) {
+                annotoAPI.close().then( function(){    
+                    annotoAPI.load(config, function(err) {
                         if (err) {
                             window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
                             return;
