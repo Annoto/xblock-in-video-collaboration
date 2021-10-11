@@ -34,7 +34,7 @@ function AnnotoXBlock(runtime, element, options) {
                     'openedx': 100,
                     'page': 1000
                 };
-                var horizontalAlign = options.overlayVideo ? 'inner' : 'element_edge';
+                var horizontalAlign = options.objectType == 'page' && 'screen_edge' || options.overlayVideo && 'inner' || 'element_edge';
                 var openOnLoad = true;
                 var enableTabs = true;
                 var videoWrapper;
@@ -104,7 +104,7 @@ function AnnotoXBlock(runtime, element, options) {
                             openOnLoad: openOnLoad,
                             kukuCloseOnLoad: true,
                             timeline: {
-                                overlayVideo: true,
+                                overlayVideo: (options.objectType == 'openedx'),
                             }
                         },
                     ],
@@ -118,7 +118,7 @@ function AnnotoXBlock(runtime, element, options) {
                         rightSmall: 16
                     };
                     config.widgets[0].player['mediaSrc'] = function() {
-                        return annotoElement['openedx'];
+                        return location.href;
                     };
                 }
 
@@ -153,7 +153,12 @@ function AnnotoXBlock(runtime, element, options) {
                 videoElement = videoElement.length && videoElement || undefined;
             }
             videoElement = videoElement || $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video');
-            videoElement.first().on('ready', setupAnnoto);
+
+            if (options.objectType == 'openedx') {
+                videoElement.first().on('ready', setupAnnoto);
+            } else {
+                setupAnnoto($(document));
+            }
         });
     };
 
