@@ -30,6 +30,9 @@ function AnnotoXBlock(runtime, element, options) {
                     'openedx': el.attr('id'),
                     'page': document.body
                 };
+                
+                window.console && console.log("AnnotoxBlock: Annoto Element is: ");
+                window.console && console.log(annotoElement[options.objectType]);
                 var zIndex = {
                     'openedx': 100,
                     'page': 1000
@@ -53,6 +56,9 @@ function AnnotoXBlock(runtime, element, options) {
                     enableTabs = !!(options.tabs === 'enabled');
                 }
 
+                window.console && console.log("AnnotoxBlock: Object Type is: " + options.objectType);
+                window.console && console.log("AnnotoxBlock: Element is: " + annotoElement[options.objectType]);
+                
                 config = {
                     clientId: options.clientId,
                     position: options.horizontal,
@@ -149,12 +155,19 @@ function AnnotoXBlock(runtime, element, options) {
 
 
             if (options.videoBlockID) {
+                window.console && console.log("AnnotoxBlock: videoBlockID is: " + options.videoBlockID);
                 videoElement = $('#video_' + options.videoBlockID);
                 videoElement = videoElement.length && videoElement || undefined;
+                window.console && console.log("AnnotoxBlock: videoElement is: ");
+                window.console && console.log(videoElement);
+
             }
             videoElement = videoElement || $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video');
 
             if (options.objectType == 'openedx') {
+                window.console && console.log("AnnotoxBlock: videoElement is: ");
+                window.console && console.log(videoElement);
+
                 videoElement.first().on('ready', setupAnnoto);
             } else {
                 setupAnnoto($(document));
