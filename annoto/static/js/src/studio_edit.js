@@ -171,4 +171,22 @@ function StudioEditableXBlockMixin(runtime, element) {
         e.preventDefault();
         runtime.notify('cancel', {});
     });
+
+    var toggleFields = function(e) {
+        var fields = $(element).find(
+            'li[data-field-name="video_block_id"], li[data-field-name="overlay_video"], li[data-field-name="video_type"]'
+        );
+
+        if ($(e.target).val() == 'page') {
+            fields.hide();
+        } else {
+            fields.show();
+        }
+    };
+
+    $(document).ready(function() {
+        var objectTypeField = $(element).find('#xb-field-edit-object_type');
+        toggleFields({target: objectTypeField});
+        objectTypeField.change(toggleFields);
+    });
 }

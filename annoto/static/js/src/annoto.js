@@ -3,6 +3,7 @@ function AnnotoXBlock(runtime, element, options) {
     var options = options;
     var getTokenUrl = runtime.handlerUrl(element, 'get_jwt_token');
     var element = $(element);
+    var config;
 
     var factory = function() {
         $(function ($) {
@@ -21,7 +22,7 @@ function AnnotoXBlock(runtime, element, options) {
                         }
                     }
                 });
-            }
+            };
 
             var setupAnnoto = function (e) {
                 var el = $(e.target);
@@ -29,11 +30,14 @@ function AnnotoXBlock(runtime, element, options) {
                     'openedx': el.attr('id'),
                     'page': document.body
                 };
+                
+                window.console && console.log("AnnotoxBlock: Annoto Element is: ");
+                window.console && console.log(annotoElement[options.objectType]);
                 var zIndex = {
                     'openedx': 100,
                     'page': 1000
                 };
-                var horizontalAlign = options.overlayVideo ? 'inner' : 'element_edge';
+                var horizontalAlign = options.objectType == 'page' && 'screen_edge' || options.overlayVideo && 'inner' || 'element_edge';
                 var openOnLoad = true;
                 var enableTabs = true;
                 var videoWrapper;
@@ -52,7 +56,10 @@ function AnnotoXBlock(runtime, element, options) {
                     enableTabs = !!(options.tabs === 'enabled');
                 }
 
-                var config = {
+                window.console && console.log("AnnotoxBlock: Object Type is: " + options.objectType);
+                window.console && console.log("AnnotoxBlock: Element is: " + annotoElement[options.objectType]);
+                
+                config = {
                     clientId: options.clientId,
                     position: options.horizontal,
                     relativePositionElement: videoWrapper,
@@ -103,7 +110,7 @@ function AnnotoXBlock(runtime, element, options) {
                             openOnLoad: openOnLoad,
                             kukuCloseOnLoad: true,
                             timeline: {
-                                overlayVideo: true,
+                                overlayVideo: (options.objectType == 'openedx'),
                             }
                         },
                     ],
@@ -117,23 +124,54 @@ function AnnotoXBlock(runtime, element, options) {
                         rightSmall: 16
                     };
                     config.widgets[0].player['mediaSrc'] = function() {
-                        return annotoElement['openedx'];
+                        return location.href;
                     };
                 }
 
+                Annoto.annotoApi ? loadChatPlugin(): initChatPlugin();
+
+            };
+
+            var initChatPlugin = function (e) {
                 Annoto.on('ready', function (api) {
+                    Annoto.annotoApi = api;
                     annotoAuth(api);
                 });
-
+                
                 Annoto.boot(config);
             };
 
+            var loadChatPlugin = function (e) {
+                Annoto.annotoApi.close().then( function(){    
+                    Annoto.annotoApi.load(config, function(err) {
+                        if (err) {
+                            window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
+                            return;
+                        }
+                        window.console && console.log('Annoto xBlock: Loaded new Configuration!');
+                    });
+                });
+            };
+
+
             if (options.videoBlockID) {
+                window.console && console.log("AnnotoxBlock: videoBlockID is: " + options.videoBlockID);
                 videoElement = $('#video_' + options.videoBlockID);
                 videoElement = videoElement.length && videoElement || undefined;
+                window.console && console.log("AnnotoxBlock: videoElement is: ");
+                window.console && console.log(videoElement);
+
             }
             videoElement = videoElement || $('.xmodule_VideoBlock .video, .xmodule_VideoModule .video');
-            videoElement.first().on('ready', setupAnnoto);
+
+            if (options.objectType == 'openedx') {
+                window.console && console.log("AnnotoxBlock: videoElement is: ");
+                window.console && console.log(videoElement);
+
+                videoElement.first().on('ready', setupAnnoto);
+            } else {
+                setupAnnoto($(document));
+            }
         });
     };
 
