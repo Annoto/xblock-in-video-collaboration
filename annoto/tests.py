@@ -53,7 +53,7 @@ class AnnotoXBlockTests(unittest.TestCase):
 
         block.submit_studio_edits(
             mock.Mock(
-                method="POST", body=json.dumps({'values': fields, 'defaults': [block.editable_fields]})
+                method="POST", body=json.dumps({'values': fields, 'defaults': [block.editable_fields]}).encode('utf-8')
             )
         )
 
@@ -67,7 +67,7 @@ class AnnotoXBlockTests(unittest.TestCase):
 
     def test_position_parser(self):
         block = self.make_one()
-        self.assertEqual(block.get_position(), [u'left', u'top'])
+        self.assertEqual(block.get_position(), [u'right', u'top'])
 
     @mock.patch('annoto.AnnotoXBlock.get_course_obj')
     def test_get_annoto_settings(self, get_course_obj_mock):
