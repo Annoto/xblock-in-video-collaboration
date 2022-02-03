@@ -29,26 +29,15 @@ class AnnotoXBlockTests(unittest.TestCase):
     def test_default_fields_values(self):
         block = self.make_one()
         self.assertEqual(block.display_name, 'Annoto')
-        self.assertEqual(block.widget_position, 'right-top')
-        self.assertFalse(block.overlay_video)
-        self.assertEqual(block.tabs, 'enabled')
-        self.assertEqual(block.initial_state, 'open')
         self.assertEqual(block.discussions_scope, 'cohort')
-        self.assertEqual(block.features, 'comments_and_notes')
 
     # Tthis change does not make sense, because the StudioEditableXBlockMixin code has already been tested
-    @data('comments', 'notes', 'only_analytics')
-    def test_set_fields_custom_values(self, features_value):
+    def test_set_fields_custom_values(self):
         block = self.make_one()
 
         fields = {
             'display_name': 'Test Annoto',
-            'widget_position': 'bottom-left',
-            'overlay_video': False,
-            'tabs': 'hidden',
-            'initial_state': 'open',
             'discussions_scope': 'course',
-            'features': features_value,
         }
 
         block.submit_studio_edits(
@@ -58,16 +47,7 @@ class AnnotoXBlockTests(unittest.TestCase):
         )
 
         self.assertEqual(block.display_name, 'Test Annoto')
-        self.assertEqual(block.widget_position, 'bottom-left')
-        self.assertFalse(block.overlay_video)
-        self.assertEqual(block.tabs, 'hidden')
-        self.assertEqual(block.initial_state, 'open')
         self.assertEqual(block.discussions_scope, 'course')
-        self.assertEqual(block.features, features_value)
-
-    def test_position_parser(self):
-        block = self.make_one()
-        self.assertEqual(block.get_position(), [u'right', u'top'])
 
     @mock.patch('annoto.AnnotoXBlock.get_course_obj')
     def test_get_annoto_settings(self, get_course_obj_mock):
