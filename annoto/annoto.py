@@ -16,7 +16,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.courses import course_image_url
-from student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
+from common.djangoapps.student.roles import CourseInstructorRole, CourseStaffRole, GlobalStaff
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
