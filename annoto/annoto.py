@@ -39,19 +39,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default=None,
     )
 
-    widget_position = String(
-        display_name=_("Widget Position"),
-        values=(
-            {'display_name': _('top-left'), 'value': 'left-top'},
-            {'display_name': _('top-right'), 'value': 'right-top'},
-            {'display_name': _('left'), 'value': 'left-center'},
-            {'display_name': _('right'), 'value': 'right-center'},
-            {'display_name': _('bottom-left'), 'value': 'left-bottom'},
-            {'display_name': _('bottom-right'), 'value': 'right-bottom'}
-        ),
-        default="right-top",
-    )
-
     object_type = String(
         display_name=_("Learning Object Type"),
         values=(
@@ -59,31 +46,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             {'display_name': _('Page'), 'value': 'page'},
         ),
         default="openedx",
-    )
-
-    overlay_video = Boolean(
-        display_name=_("Overlay Video"),
-        default=False
-    )
-
-    tabs = String(
-        display_name=_("Tabs"),
-        values=(
-            {'display_name': _('Enabled'), 'value': 'enabled'},
-            {'display_name': _('Hidden'), 'value': 'hidden'},
-            {'display_name': _('Auto'), 'value': 'auto'},
-        ),
-        default="enabled",
-    )
-
-    initial_state = String(
-        display_name=_("Initial State"),
-        values=(
-            {'display_name': _('Auto'), 'value': 'auto'},
-            {'display_name': _('Open'), 'value': 'open'},
-            {'display_name': _('Closed'), 'value': 'closed'}
-        ),
-        default="open",
     )
 
     discussions_scope = String(
@@ -105,20 +67,8 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         default="ondemand",
     )
 
-    features = String(
-        display_name=_("Features"),
-        values=(
-            {'display_name': _('Comments & Notes'), 'value': 'comments_and_notes'},
-            {'display_name': _('Comments'), 'value': 'comments'},
-            {'display_name': _('Private Notes'), 'value': 'notes'},
-            {'display_name': _('Only Analytics'), 'value': 'only_analytics'},
-        ),
-        default="comments_and_notes",
-    )
-
     editable_fields = (
-        'display_name', 'object_type', 'video_block_id', 'widget_position', 'overlay_video',
-        'tabs', 'initial_state', 'discussions_scope', 'video_type', 'features',
+        'display_name', 'object_type', 'video_block_id', 'discussions_scope', 'video_type',
     )
 
     has_author_view = True
@@ -137,10 +87,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
-
-    def get_position(self):
-        """Parse 'widget_position' field"""
-        return self.widget_position.split('-')
 
     def author_view(self, context=None):
         context = context or {}
@@ -188,7 +134,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
     def _base_view(self, context=None):
         context = context is None and {'is_author_view': False} or context
         annoto_auth = self.get_annoto_settings()
-        horizontal, vertical = self.get_position()
         translator = self.runtime.service(self, 'i18n').translator
         lang = getattr(
             translator,
@@ -213,11 +158,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         js_params = {
             'objectType': self.object_type,
             'clientId': annoto_auth.get('client_id'),
-            'horizontal': horizontal,
-            'vertical': vertical,
-            'tabs': self.tabs,
-            'overlayVideo': self.overlay_video,
-            'initialState': self.initial_state,
             'privateThread': self.discussions_scope != 'site',
             'mediaTitle': self.get_parent().display_name,
             'language': lang,
@@ -228,8 +168,6 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
             'courseImage': course_image_url(course),
             'demoMode': not bool(annoto_auth.get('client_id')),
             'isLive': self.video_type == 'stream',
-            'comments': 'comments' in self.features,
-            'privateNotes': 'notes' in self.features,
             'videoBlockID': self.video_block_id,
         }
 

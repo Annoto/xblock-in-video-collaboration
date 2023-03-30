@@ -25,54 +25,27 @@ function AnnotoXBlock(runtime, element, options) {
             };
 
             var setupAnnoto = function (e) {
-                var el = $(e.target);
                 var annotoElement = {
-                    'openedx': el.attr('id'),
+                    'openedx': e.target,
                     'page': document.body
                 };
-                
+
                 window.console && console.log("AnnotoxBlock: Annoto Element is: ");
                 window.console && console.log(annotoElement[options.objectType]);
                 var zIndex = {
                     'openedx': 100,
                     'page': 1000
                 };
-                var horizontalAlign = options.objectType == 'page' && 'screen_edge' || options.overlayVideo && 'inner' || 'element_edge';
-                var openOnLoad = true;
-                var enableTabs = true;
-                var videoWrapper;
-
-                if (horizontalAlign === 'inner') {
-                    videoWrapper = el.find('div.video-wrapper')[0];
-                    openOnLoad = false;
-                    enableTabs = false;
-                }
-
-                if (options.initialState !== 'auto') {
-                    openOnLoad = !!(options.initialState === 'open');
-                }
-
-                if (options.tabs !== 'auto') {
-                    enableTabs = !!(options.tabs === 'enabled');
-                }
+                var horizontalAlign = options.objectType == 'page' && 'screen_edge' || 'element_edge';
 
                 window.console && console.log("AnnotoxBlock: Object Type is: " + options.objectType);
                 window.console && console.log("AnnotoxBlock: Element is: " + annotoElement[options.objectType]);
-                
+
                 config = {
                     clientId: options.clientId,
-                    position: options.horizontal,
-                    relativePositionElement: videoWrapper,
-                    features: {
-                        tabs: enableTabs,
-                        comments: options.comments,
-                        privateNotes: options.privateNotes,
-                        timeline: options.comments || options.privateNotes
-                    },
                     locale: options.language,
                     rtl: options.rtl,
                     align: {
-                        vertical: options.vertical,
                         horizontal: horizontalAlign,
                     },
                     width: {
@@ -107,7 +80,6 @@ function AnnotoXBlock(runtime, element, options) {
                                     return extendedDetails;
                                 }
                             },
-                            openOnLoad: openOnLoad,
                             kukuCloseOnLoad: true,
                             timeline: {
                                 overlayVideo: (options.objectType == 'openedx'),
@@ -129,7 +101,6 @@ function AnnotoXBlock(runtime, element, options) {
                 }
 
                 Annoto.annotoApi ? loadChatPlugin(): initChatPlugin();
-
             };
 
             var initChatPlugin = function (e) {
@@ -137,12 +108,12 @@ function AnnotoXBlock(runtime, element, options) {
                     Annoto.annotoApi = api;
                     annotoAuth(api);
                 });
-                
+
                 Annoto.boot(config);
             };
 
             var loadChatPlugin = function (e) {
-                Annoto.annotoApi.close().then( function(){    
+                Annoto.annotoApi.destroy().then(function() {
                     Annoto.annotoApi.load(config, function(err) {
                         if (err) {
                             window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
@@ -177,7 +148,7 @@ function AnnotoXBlock(runtime, element, options) {
 
     try {
         if (typeof require == 'function' && typeof Annoto != 'object') {
-            require(['//app.annoto.net/annoto-bootstrap.js'], function(Annoto) {
+            require(['//cdn.annoto.net/widget/latest/bootstrap.js'], function(Annoto) {
                 factory();
             });
         } else {
