@@ -16,7 +16,7 @@ https://docs.annoto.net/developers/
 ```shell
 sudo -sHu edxapp
 source ~/edxapp_env
-pip install -e "git+https://github.com/Annoto/xblock-in-video-collaboration.git#egg=xblock_annoto"
+pip install "git+https://github.com/Annoto/xblock-in-video-collaboration.git"
 ```
 
 ## Enabling in Studio
