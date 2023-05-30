@@ -25,33 +25,38 @@ function AnnotoXBlock(runtime, element, options) {
             };
 
             var setupAnnoto = function (e) {
+                var el = $(e.target);
                 var annotoElement = {
-                    'openedx': e.target,
+                    'openedx': el.attr('id'),
                     'page': document.body
                 };
-
-                window.console && console.log("AnnotoxBlock: Annoto Element is: ");
-                window.console && console.log(annotoElement[options.objectType]);
-                var zIndex = {
-                    'openedx': 100,
-                    'page': 1000
-                };
-                var horizontalAlign = options.objectType == 'page' && 'screen_edge' || 'element_edge';
+                               
 
                 window.console && console.log("AnnotoxBlock: Object Type is: " + options.objectType);
                 window.console && console.log("AnnotoxBlock: Element is: " + annotoElement[options.objectType]);
-
+                
                 config = {
+
                     clientId: options.clientId,
                     locale: options.language,
                     rtl: options.rtl,
-                    align: {
-                        horizontal: horizontalAlign,
+                    relativePositionElement: videoWrapper,
+                    hooks: {
+                        mediaDetails: function() {
+                            return {
+                                details: {
+                                    title: options.mediaTitle,
+                                    //description: TBD,
+                                },
+                            };
+                        },
                     },
-                    width: {
-                        max: 400,
+                    group: {
+                        id: options.courseId,
+                        title: options.courseDisplayName,
+                        description: options.courseDescription,
                     },
-                    zIndex: zIndex[options.objectType],
+                    
                     widgets: [
                         {
                             player: {
@@ -59,34 +64,14 @@ function AnnotoXBlock(runtime, element, options) {
                                 element: annotoElement[options.objectType],
                                 params: {
                                     isLive: options.isLive
-                                },
-                                mediaDetails: function(details) {
-                                    var extendedDetails = {
-                                        title: options.mediaTitle,
-                                        group: {
-                                            id: options.courseId,
-                                            title: options.courseDisplayName,
-                                            description: options.courseDescription,
-                                            thumbnails: {
-                                                default: window.location.origin + options.courseImage
-                                            },
-                                            privateThread: options.privateThread
-                                        }
-                                    }
-                                    if (details) {
-                                        extendedDetails.authorName = details.authorName;
-                                        extendedDetails.description = details.description;
-                                    }
-                                    return extendedDetails;
-                                }
+                                },   
                             },
-                            kukuCloseOnLoad: true,
                             timeline: {
                                 overlayVideo: (options.objectType == 'openedx'),
                             }
                         },
                     ],
-                    demoMode: options.demoMode
+                    demoMode: false 
                 };
 
                 if (options.objectType == 'page') {
@@ -101,6 +86,7 @@ function AnnotoXBlock(runtime, element, options) {
                 }
 
                 Annoto.annotoApi ? loadChatPlugin(): initChatPlugin();
+
             };
 
             var initChatPlugin = function (e) {
@@ -108,12 +94,12 @@ function AnnotoXBlock(runtime, element, options) {
                     Annoto.annotoApi = api;
                     annotoAuth(api);
                 });
-
+                
                 Annoto.boot(config);
             };
 
             var loadChatPlugin = function (e) {
-                Annoto.annotoApi.destroy().then(function() {
+                Annoto.annotoApi.close().then( function(){    
                     Annoto.annotoApi.load(config, function(err) {
                         if (err) {
                             window.console && console.log('Annoto XBlock: Error while reloading Annoto configuration');
@@ -145,7 +131,7 @@ function AnnotoXBlock(runtime, element, options) {
             }
         });
     };
-
+    
     try {
         if (typeof require == 'function' && typeof Annoto != 'object') {
             require(['//cdn.annoto.net/widget/latest/bootstrap.js'], function(Annoto) {
