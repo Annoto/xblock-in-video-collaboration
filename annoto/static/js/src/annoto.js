@@ -40,7 +40,6 @@ function AnnotoXBlock(runtime, element, options) {
                     clientId: options.clientId,
                     locale: options.language,
                     rtl: options.rtl,
-                    relativePositionElement: videoWrapper,
                     hooks: {
                         mediaDetails: function() {
                             return {
