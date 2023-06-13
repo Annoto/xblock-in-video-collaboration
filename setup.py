@@ -27,7 +27,7 @@ def package_data(pkg, roots):
 
 setup(
     name='annoto-xblock',
-    version='0.3.3',
+    version='0.4.0',
     description='An XBlock for adding Annoto in-video collaboration solution to any video',
     long_description=README,
     license='Apache 2.0',
