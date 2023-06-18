@@ -101,7 +101,7 @@ class AnnotoXBlock(StudioEditableXBlockMixin, XBlock):
         context = context or {}
         context['is_author_view'] = False
         frag = self._base_view(context=context)
-        frag.add_javascript_url('//app.annoto.net/annoto-bootstrap.js')
+        frag.add_javascript_url('//cdn.annoto.net/widget/latest/bootstrap.js')
         return frag
 
     def studio_view(self, context):
