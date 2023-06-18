@@ -27,7 +27,7 @@ function AnnotoXBlock(runtime, element, options) {
             var setupAnnoto = function (e) {
                 var el = $(e.target);
                 var annotoElement = {
-                    'openedx': el.attr('id'),
+                    'openedx': el, /*el.attr('id')*/
                     'page': document.body
                 };
                                
